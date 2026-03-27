@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sales Diagnostic System</title>
+<!-- fonts loaded from system -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --navy:#0d1b2a;--navy-card:#1a2d42;--navy-surface:#152336;
+  --gold:#c9a84c;--gold-light:#e8c97a;--gold-pale:rgba(201,168,76,0.12);--gold-border:rgba(201,168,76,0.3);
+  --text-primary:#f0ece4;--text-secondary:rgba(240,236,228,0.6);--text-muted:rgba(240,236,228,0.32);
+  --card-border:rgba(255,255,255,0.07);--radius:14px;--radius-sm:10px;--radius-pill:50px;
+  --alert-bg:rgba(220,70,60,0.13);--alert-border:rgba(220,70,60,0.42);--alert-text:#f4a497;
+  --green-bg:rgba(60,180,100,0.12);--green-border:rgba(60,180,100,0.38);--green-text:#86e0a8;
+  --blue-bg:rgba(100,160,240,0.12);--blue-border:rgba(100,160,240,0.45);--blue-text:rgba(160,200,255,0.95);
+  --silver:#a8b8c8;
+}
+html,body{height:100%;background:var(--navy);color:var(--text-primary);font-family:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;overflow:hidden;}
+#app{height:100%;display:flex;flex-direction:column;}
+.screen{height:100%;display:flex;flex-direction:column;background:var(--navy);}
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.top-bar{background:var(--navy-surface);border-bottom:1px solid var(--card-border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.rep-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block;margin-right:7px;}
+.rep-label{font-size:13px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
+.step-label{font-size:13px;color:var(--text-muted);font-weight:300;}
+.three-dot-btn{display:flex;gap:5px;align-items:center;padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;background:transparent;}
+.dot-sh{width:6px;height:6px;border-radius:50%;background:var(--text-muted);}
+.owner-strip-wrap{background:var(--navy-card);border-bottom:1px solid var(--card-border);flex-shrink:0;}
+.owner-strip-main{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.owner-name{font-family:Georgia, 'Times New Roman', serif;font-size:26px;font-weight:500;color:var(--text-primary);letter-spacing:.02em;}
+.owner-num{font-size:13px;color:var(--text-muted);font-weight:300;margin-top:2px;}
+.owner-right{display:flex;align-items:center;gap:16px;}
+.vip-block{display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
+.vip-prefix{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;}
+.vip-name-disp{font-family:Georgia, 'Times New Roman', serif;font-size:24px;font-weight:600;letter-spacing:.04em;line-height:1.1;}
+.eb-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
+.eb-star-frame{position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;}
+.eb-star-frame svg{position:absolute;inset:0;width:54px;height:54px;}
+.eb-name-row{display:flex;gap:3px;}
+.eb-t{font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;}
+.eb-cap{font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);}
+.other-products-row{padding:6px 20px 10px;display:flex;gap:5px;flex-wrap:wrap;border-top:1px solid var(--card-border);align-items:center;}
+.op-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-right:4px;}
+.ctag{font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:var(--radius-pill);border:1px solid;white-space:nowrap;transition:all .25s;background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.07);color:var(--text-muted);cursor:pointer;}
+.ctag.green.lit{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);}
+.ctag.blue.lit{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text);}
+.ctag.gold.lit{background:var(--gold-pale);border-color:var(--gold-border);color:var(--gold-light);}
+.section-label{font-size:14px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);padding-left:2px;margin-bottom:8px;}
+.chip{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius-pill);padding:13px 20px;font-size:17px;font-weight:400;color:var(--text-secondary);cursor:pointer;transition:all .18s;user-select:none;white-space:nowrap;display:inline-block;}
+.chip.sel{background:var(--gold-pale);border-color:var(--gold-border);color:var(--gold-light);font-weight:500;}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.visit-chip{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:13px 18px;cursor:pointer;transition:all .18s;user-select:none;display:flex;flex-direction:column;gap:3px;min-width:100px;align-items:center;}
+.visit-chip.sel{background:var(--gold-pale);border-color:var(--gold-border);}
+.vc-main{font-size:15px;font-weight:500;color:var(--text-primary);}
+.visit-chip.sel .vc-main{color:var(--gold-light);}
+.vc-sub{font-size:12px;color:var(--text-muted);}
+.tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+.vip-tile{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:13px 14px;cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;justify-content:space-between;gap:5px;user-select:none;}
+.vip-tile.sel{background:var(--gold-pale);border-color:var(--gold-border);}
+.vip-tile.sel-eb{background:rgba(201,168,76,0.2);border-color:var(--gold);}
+.tile-name{font-size:16px;font-weight:500;color:var(--text-primary);line-height:1.4;}
+.vip-tile.sel .tile-name,.vip-tile.sel-eb .tile-name{color:var(--gold-light);}
+.tile-check{width:16px;height:16px;border-radius:50%;border:1px solid var(--card-border);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;background:transparent;}
+.vip-tile.sel .tile-check,.vip-tile.sel-eb .tile-check{background:var(--gold);border-color:var(--gold);}
+.divider{height:1px;background:var(--card-border);width:100%;margin:4px 0;}
+.footer-bar{background:var(--navy-surface);border-top:1px solid var(--card-border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-shrink:0;}
+.btn-primary{background:var(--gold);border:none;border-radius:var(--radius-sm);color:var(--navy);font-family:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;font-size:17px;font-weight:500;padding:16px 32px;cursor:pointer;letter-spacing:.03em;}
+.btn-primary:disabled{opacity:.3;cursor:default;}
+.btn-secondary{background:transparent;border:1px solid var(--card-border);border-radius:var(--radius-sm);color:var(--text-secondary);font-family:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;font-size:15px;padding:16px 20px;cursor:pointer;}
+.readiness-txt{font-size:14px;color:var(--text-muted);font-weight:300;}
+.readiness-txt b{color:var(--gold);font-weight:500;}
+.credit-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.credit-lbl{font-size:12px;color:var(--text-muted);font-weight:300;min-width:135px;}
+.credit-inp{font-size:14px;color:var(--text-secondary);background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.08);outline:none;width:80px;padding-bottom:1px;font-family:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;text-align:right;}
+.owner-inp{font-family:Georgia, 'Times New Roman', serif;font-size:28px;font-weight:500;color:var(--text-primary);background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.1);outline:none;width:100%;padding-bottom:3px;letter-spacing:.02em;}
+.owner-inp::placeholder{color:var(--text-muted);font-style:italic;}
+.num-inp{font-size:14px;color:var(--text-secondary);background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.08);outline:none;width:130px;padding-bottom:1px;font-family:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;}
+.num-inp::placeholder{color:rgba(240,236,228,0.18);}
+.fee-inp::-webkit-inner-spin-button,.fee-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.fee-inp[type=number]{-moz-appearance:textfield;}
+.fee-inp{font-size:34px;font-weight:500;color:var(--gold);background:transparent;border:none;border-bottom:2px solid rgba(201,168,76,0.25);outline:none;width:100px;text-align:right;padding-bottom:2px;font-family:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;line-height:1;}
+.fee-inp::placeholder{color:rgba(201,168,76,0.25);}
+.date-inp{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius-pill);padding:10px 16px;font-family:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;font-size:14px;color:var(--text-secondary);outline:none;width:135px;}
+.date-inp::placeholder{color:var(--text-muted);}
+.vip-disp-block{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-height:44px;justify-content:center;}
+.vip-disp-prefix{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;}
+.vip-disp-name{font-family:Georgia, 'Times New Roman', serif;font-size:24px;font-weight:600;letter-spacing:.04em;line-height:1.1;}
+.warn-row{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.warn-tag{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:4px 12px;border-radius:var(--radius-pill);background:var(--alert-bg);border:1px solid var(--alert-border);color:var(--alert-text);}
+.warn-note{font-size:11px;color:var(--alert-text);opacity:.7;font-weight:300;font-style:italic;}
+.p-section{padding:18px 20px;display:flex;flex-direction:column;gap:14px;}
+.progress-dots{display:flex;gap:5px;align-items:center;}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--text-muted);transition:all .3s;display:inline-block;}
+.pdot.done{background:var(--gold);}
+.pdot.active{background:var(--gold-light);width:20px;border-radius:3px;}
+.q-number{font-size:13px;font-weight:500;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+.q-text{font-family:Georgia, 'Times New Roman', serif;font-size:28px;font-weight:500;line-height:1.3;color:var(--text-primary);margin-bottom:10px;}
+.instr-bar{background:rgba(201,168,76,0.07);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:14px;color:var(--gold-light);font-weight:300;text-align:center;}
+.instr-bar.rdy{background:rgba(201,168,76,0.12);color:var(--gold);}
+.answer-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:17px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:68px;user-select:none;margin-bottom:10px;position:relative;overflow:hidden;width:100%;max-width:600px;box-sizing:border-box;}
+.answer-card.sel-p{border-color:rgba(201,168,76,0.7);background:#1f3452;}
+.answer-card.sel-s{border-color:rgba(201,168,76,0.35);background:#1f3452;}
+.card-text{font-size:18px;font-weight:400;color:var(--text-primary);flex:1;line-height:1.4;}
+.card-badge{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;white-space:nowrap;display:none;}
+.sel-p .badge-p{display:inline-block;background:var(--gold);color:var(--navy);}
+.sel-s .badge-s{display:inline-block;background:rgba(201,168,76,0.2);color:var(--gold-light);border:1px solid var(--gold-border);}
+.open-ta{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:16px;font-family:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;font-size:15px;color:var(--text-primary);resize:none;outline:none;width:100%;height:110px;line-height:1.6;}
+.open-ta:focus{border-color:var(--gold-border);}
+.open-ta::placeholder{color:var(--text-muted);}
+.open-nudge{font-size:13px;color:var(--text-muted);text-align:center;margin-top:8px;}
+.open-nudge.rdy{color:var(--gold);}
+.tap-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:20px 16px;cursor:pointer;transition:all .18s;user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:86px;text-align:center;}
+.tap-card.sel{background:var(--gold-pale);border-color:var(--gold-border);}
+.tap-label{font-size:17px;font-weight:500;color:var(--text-primary);}
+.tap-card.sel .tap-label{color:var(--gold-light);}
+.tap-sub{font-size:14px;color:var(--text-muted);font-weight:300;}
+.tap-card.sel .tap-sub{color:var(--gold);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;}
+.guard-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:16px 20px;cursor:pointer;transition:all .2s;user-select:none;display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
+.guard-card.on{background:var(--alert-bg);border-color:var(--alert-border);}
+.g-title{font-size:16px;font-weight:500;color:var(--text-primary);}
+.guard-card.on .g-title{color:var(--alert-text);}
+.g-sub{font-size:13px;color:var(--text-muted);font-weight:300;}
+.toggle-pill{width:44px;height:26px;border-radius:13px;background:rgba(255,255,255,0.08);border:1px solid var(--card-border);position:relative;transition:all .2s;flex-shrink:0;}
+.toggle-pill.on{background:var(--alert-border);}
+.toggle-thumb{width:20px;height:20px;border-radius:50%;background:var(--text-muted);position:absolute;top:2px;left:2px;transition:all .2s;}
+.toggle-pill.on .toggle-thumb{left:20px;background:var(--alert-text);}
+.tab-bar{background:var(--navy-surface);border-bottom:1px solid var(--card-border);display:flex;padding:0 12px;overflow-x:auto;flex-shrink:0;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab{padding:15px 16px;font-size:15px;font-weight:400;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;flex-shrink:0;user-select:none;}
+.tab.active{color:var(--text-primary);border-bottom-color:var(--gold);}
+.tab.alert-tab{color:var(--alert-text);}
+.tab.alert-tab.active{border-bottom-color:var(--alert-text);}
+.tab.pgm-tab{color:var(--gold);}
+.tab.pgm-tab.active{color:var(--gold-light);border-bottom-color:var(--gold);}
+.alert-pip{width:7px;height:7px;border-radius:50%;background:var(--alert-text);display:inline-block;margin-left:4px;vertical-align:middle;animation:pip 1.8s ease-in-out infinite;}
+@keyframes pip{0%,100%{opacity:1;}50%{opacity:.25;}}
+.tab-body{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.tab-body.active{display:block;}
+.card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:16px;}
+.card+.card{margin-top:12px;}
+.hero-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:24px;text-align:center;}
+.hero-title{font-family:Georgia, 'Times New Roman', serif;font-size:26px;font-weight:500;color:var(--text-primary);line-height:1.2;margin-bottom:10px;}
+.hero-div{width:36px;height:1px;background:var(--gold-border);margin:0 auto 10px;}
+.hero-sub{font-size:14px;color:var(--text-secondary);font-weight:300;line-height:1.6;max-width:320px;margin:0 auto;}
+.d2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.dc{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:14px;}
+.dc-lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.dc-val{font-size:15px;font-weight:500;color:var(--text-primary);}
+.dc-sub{font-size:12px;color:var(--text-secondary);font-weight:300;margin-top:2px;}
+.flag-banner{background:var(--alert-bg);border:1px solid var(--alert-border);border-radius:var(--radius);padding:16px;margin-top:12px;}
+.flag-banner-title{font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--alert-text);margin-bottom:10px;}
+.flag-item{padding:9px 11px;background:rgba(220,70,60,0.08);border-radius:var(--radius-sm);border-left:3px solid var(--alert-border);margin-bottom:8px;}
+.flag-item:last-child{margin-bottom:0;}
+.flag-signal{font-size:11px;color:var(--alert-text);font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;}
+.flag-text{font-size:13px;color:var(--alert-text);opacity:.8;font-weight:300;line-height:1.4;}
+.ns-lbl{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);padding-left:2px;margin-bottom:8px;}
+.disc-card{border-radius:var(--radius);padding:16px;border:1px solid;cursor:pointer;margin-bottom:9px;}
+.disc-card.neutral{background:var(--navy-card);border-color:var(--card-border);}
+.disc-card.pending{background:var(--alert-bg);border-color:var(--alert-border);}
+.disc-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.disc-title-txt{font-size:14px;font-weight:500;}
+.disc-badge{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:var(--radius-pill);border:1px solid;white-space:nowrap;flex-shrink:0;}
+.disc-badge.red{background:var(--alert-bg);border-color:var(--alert-border);color:var(--alert-text);}
+.disc-badge.muted{background:rgba(255,255,255,0.04);border-color:var(--card-border);color:var(--text-muted);}
+.disc-body-txt{font-size:13px;font-weight:300;line-height:1.5;}
+.disc-hint-txt{font-size:11px;color:var(--text-muted);margin-top:5px;font-style:italic;}
+.elig-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:16px;margin-bottom:9px;}
+.elig-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.elig-title-txt{font-size:14px;font-weight:500;color:var(--text-primary);}
+.elig-badge{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:var(--radius-pill);}
+.elig-badge.open{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green-text);}
+.elig-badge.closed{background:var(--alert-bg);border:1px solid var(--alert-border);color:var(--alert-text);}
+.elig-body-txt{font-size:13px;color:var(--text-secondary);font-weight:300;line-height:1.5;}
+.elig-date-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.elig-date-lbl{font-size:12px;color:var(--text-muted);font-weight:300;white-space:nowrap;}
+.elig-date-inp{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.15);outline:none;font-family:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;font-size:13px;color:#f0c97a;width:85px;padding-bottom:1px;}
+.closed-card{background:var(--alert-bg);border:1px solid var(--alert-border);border-radius:var(--radius);padding:16px;margin-bottom:9px;}
+.mgr-prompt{background:rgba(20,40,70,0.95);border:2px solid var(--blue-border);border-radius:var(--radius);padding:18px;margin-top:10px;}
+.mgr-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.mgr-icon{width:32px;height:32px;border-radius:50%;background:var(--blue-bg);border:1px solid var(--blue-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mgr-title{font-size:14px;font-weight:500;color:var(--blue-text);}
+.mgr-body{font-size:13px;color:rgba(160,200,255,.75);font-weight:300;line-height:1.6;}
+.mgr-ref{font-size:11px;color:rgba(160,200,255,.35);letter-spacing:.06em;text-transform:uppercase;margin-top:6px;}
+.pref-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:18px;}
+.pref-sec-lbl{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--card-border);padding-bottom:5px;margin-bottom:10px;margin-top:14px;}
+.pref-sec-lbl:first-child{margin-top:0;}
+.pref-q-txt{font-size:15px;color:var(--text-muted);font-weight:300;margin-bottom:5px;}
+.pref-a-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.pref-a{font-size:15px;font-weight:500;color:var(--gold-light);background:var(--gold-pale);border:1px solid var(--gold-border);padding:3px 11px;border-radius:var(--radius-pill);}
+.pref-a.sec{font-size:15px;color:var(--text-secondary);background:rgba(255,255,255,0.04);border-color:var(--card-border);font-weight:300;}
+.pref-open{font-size:13px;color:var(--text-secondary);font-weight:300;font-style:italic;line-height:1.5;padding:9px 11px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);border-left:2px solid var(--card-border);}
+.pgm-hdr-card{background:var(--navy-card);border:1px solid var(--gold-border);border-radius:var(--radius);padding:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;}
+.pgm-owner-name{font-family:Georgia, 'Times New Roman', serif;font-size:22px;font-weight:500;color:var(--text-primary);}
+.pgm-owner-num{font-size:12px;color:var(--text-muted);font-weight:300;margin-top:2px;}
+.pgm-fee-lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;text-align:right;}
+.pgm-fee-val{font-family:Georgia, 'Times New Roman', serif;font-size:34px;font-weight:600;color:var(--gold);line-height:1;text-align:right;}
+.pgm-fee-sub{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;text-align:right;}
+.pgm-sum-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
+.pgm-sum-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:14px;}
+.pgm-s-lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.pgm-s-val{font-size:18px;font-weight:500;}
+.pgm-s-sub{font-size:12px;color:var(--text-secondary);font-weight:300;margin-top:2px;}
+.pgm-tbl{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;}
+.pgm-tbl-hdr{display:grid;grid-template-columns:56px 1fr 1fr;padding:11px 16px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--card-border);}
+.pgm-th{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
+.pgm-th:not(:first-child){text-align:right;}
+.pgm-row{display:grid;grid-template-columns:56px 1fr 1fr;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.pgm-row:last-child{border-bottom:none;}
+.pgm-row.milestone{background:rgba(201,168,76,0.07);}
+.pgm-row.final{background:rgba(220,70,60,0.1);border-top:1px solid var(--alert-border);}
+.pgm-cell{font-size:13px;color:var(--text-secondary);font-weight:300;}
+.pgm-cell:not(:first-child){text-align:right;}
+.pgm-cell.yr{color:var(--text-muted);}
+.pgm-cell.ann{color:var(--text-primary);font-weight:400;}
+.pgm-cell.cum{color:var(--gold);font-weight:500;}
+.pgm-cell.cum.last{color:var(--alert-text);font-size:15px;font-weight:500;}
+.pgm-note{font-size:11px;color:var(--text-muted);font-weight:300;padding:11px 16px;font-style:italic;border-top:1px solid var(--card-border);text-align:center;}
+.id-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;margin-bottom:12px;}
+.id-bg{position:absolute;inset:0;pointer-events:none;}
+.id-inner{position:relative;z-index:1;}
+.id-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.id-type-lbl{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;}
+.id-type{font-family:Georgia, 'Times New Roman', serif;font-size:28px;font-weight:600;color:var(--text-primary);line-height:1.1;}
+.id-mindset{font-size:13px;color:var(--text-secondary);font-weight:300;margin-top:2px;}
+.conf-lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;text-align:right;}
+.conf-bars{display:flex;gap:4px;justify-content:flex-end;}
+.conf-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.conf-bar-lbl{font-size:9px;color:var(--text-muted);}
+.conf-bar{width:30px;height:7px;border-radius:3px;background:rgba(255,255,255,0.08);}
+.conf-bar.hi{background:var(--gold);}
+.conf-bar.lo{background:rgba(100,160,240,0.45);}
+.jackal-row{background:var(--alert-bg);border:1px solid var(--alert-border);border-radius:var(--radius-sm);padding:11px 15px;display:flex;align-items:center;gap:10px;}
+.j-dot{width:8px;height:8px;border-radius:50%;background:var(--alert-text);flex-shrink:0;}
+.j-text{font-size:13px;color:var(--alert-text);line-height:1.4;}
+.pb-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.pb-title{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:13px;}
+.pb-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.pb-sec{display:flex;flex-direction:column;gap:5px;}
+.pb-sec-lbl{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--gold-border);padding-bottom:3px;}
+.pb-sec.avoid .pb-sec-lbl{color:var(--alert-text);border-bottom-color:var(--alert-border);}
+.pb-item{font-size:13px;color:var(--text-secondary);font-weight:300;line-height:1.5;padding-left:9px;border-left:2px solid rgba(201,168,76,0.2);}
+.pb-sec.avoid .pb-item{border-left-color:rgba(220,70,60,0.25);}
+.exp-card{background:var(--navy-card);border:1px solid var(--card-border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;}
+.exp-hdr{padding:15px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.exp-ttl{font-size:13px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);}
+.exp-arr{font-size:14px;color:var(--text-muted);transition:transform .22s;display:inline-block;}
+.exp-bdy{padding:0 18px 15px;display:none;flex-direction:column;gap:9px;}
+.exp-bdy.open{display:flex;}
+.angle-item{padding:11px 13px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);border-left:3px solid var(--gold-border);}
+.angle-num{font-size:10px;color:var(--gold);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;}
+.angle-text{font-size:14px;color:var(--text-primary);font-weight:400;line-height:1.4;}
+.curiosity-item{padding:11px 13px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);border-left:3px solid rgba(100,160,240,0.3);}
+.curiosity-text{font-size:14px;color:var(--text-secondary);font-weight:300;line-height:1.5;font-style:italic;}
+.overlay-screen{position:fixed;inset:0;background:var(--navy);z-index:200;display:none;flex-direction:column;}
+.overlay-screen.open{display:flex;}
+.overlay-bar{background:var(--navy-surface);border-bottom:1px solid var(--card-border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.overlay-back{font-size:14px;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:6px;}
+.overlay-title{font-size:13px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
+.complete-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 28px;text-align:center;gap:16px;}
+.check-icon{width:64px;height:64px;border-radius:50%;background:var(--gold-pale);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;}
+.complete-title{font-family:Georgia, 'Times New Roman', serif;font-size:30px;font-weight:500;}
+.complete-sub{font-size:14px;color:var(--text-secondary);font-weight:300;line-height:1.6;max-width:300px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+window.onerror = function(msg, src, line, col, err) {
+  document.body.innerHTML = '<div style="background:#0d1b2a;color:#f4a497;padding:40px;font-family:sans-serif;font-size:16px;"><h2>Error loading app</h2><p>' + msg + '</p><p>Line: ' + line + '</p><p>' + (err ? err.stack : '') + '</p></div>';
+  return true;
+};
+</script>
+
+<div id="overlay-screen" class="overlay-screen">
+  <div class="overlay-bar">
+    <div class="overlay-back" onclick="closeOverlay()">&#8592; Back to Results</div>
+    <div class="overlay-title">Profile</div>
+  </div>
+  <div class="scroll-area" style="padding:18px 20px;">
+    <div id="overlay-content"></div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+var S = {
+  step: 1,
+  twoPersonMode: false,
+  intake: { ownerName:'', ownerNum:'', fee:'', creditsVip:'', creditsInelig:'', tourTypes:[], tourDate:'', resort:[], vipLevel:null, ebSelected:false, ineligSelected:false, ebCredits:'', contract:[], legacy:null },
+  surveyAnswers: null,
+  discovery: null,
+  score: null,
+  // step 2 internal
+  q: 0,
+  answers: null,
+  surveyDone: false,
+  // step 3 internal
+  d: { usage:null, booking:null, preference:null, engagement:null, guarded:false },
+  // step 4 internal
+  activeTab: 'summary',
+  discState: null,
+  ebStart: 'May 2026',
+  ebEnd: 'Jul 2026',
+  expanded: {}
+};
+
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+var QUESTIONS = [
+  { id:1, text:"What originally made this ownership feel right for you?", type:"dual",
+    answers:[
+      {text:"Confidence I was making the right decision and getting strong value for how I travel",p:"Lion",m:"Maximize"},
+      {text:"It fit my lifestyle and the kind of experiences I wanted",p:"Otter",m:"NoHassle"},
+      {text:"I trusted the recommendation and felt comfortable moving forward",p:"Retriever",m:"NoHassle"},
+      {text:"It made the most sense after comparing my travel options carefully",p:"Owl",m:"Maximize"}
+    ]},
+  { id:2, text:"Today, what matters most about your ownership experience?", type:"dual",
+    answers:[
+      {text:"Getting the strongest overall value out of my credits and availability",p:"Lion",m:"Maximize"},
+      {text:"Having it fit smoothly into my life and travel goals",p:"Otter",m:"NoHassle"},
+      {text:"Keeping things consistent, simple, and easy to use",p:"Retriever",m:"NoHassle"},
+      {text:"Making sure everything is working as it should and that I stay informed on changes",p:"Owl",m:"Maximize"}
+    ]},
+  { id:3, text:"When something needs to be adjusted or improved for the overall benefit of the Club, what feels best to you?", type:"dual",
+    answers:[
+      {text:"Show me the best option and I'll move on it",p:"Lion",m:"Maximize"},
+      {text:"Help me understand what fits my situation best",p:"Otter",m:"NoHassle"},
+      {text:"Walk me through what usually works well for others like me",p:"Retriever",m:"NoHassle"},
+      {text:"Let me review the details before deciding",p:"Owl",m:"Maximize"}
+    ]},
+  { id:4, text:"What's one thing about your current experience you wish worked a little better?", type:"open" },
+  { id:5, text:"Looking ahead, what feels most important over the next 1–2 years?", type:"dual",
+    answers:[
+      {text:"Staying ahead, staying informed, and making strong choices for future experiences",p:"Lion",m:"Maximize"},
+      {text:"Keeping things aligned with my life as it changes and continuing to enjoy it",p:"Otter",m:"NoHassle"},
+      {text:"Stability and simplicity — I don't want this to feel like a second job",p:"Retriever",m:"NoHassle"},
+      {text:"Getting the most value possible out of every credit and decision",p:"Owl",m:"Maximize"}
+    ]},
+  { id:6, text:"When reviewing something important, what helps you most?", type:"dual",
+    answers:[
+      {text:"A clear summary so I can move forward quickly",p:"Lion",m:"NoHassle"},
+      {text:"Seeing how it fits my situation personally",p:"Otter",m:"NoHassle"},
+      {text:"Knowing what has worked well for others",p:"Retriever",m:"NoHassle"},
+      {text:"A full breakdown of the details so I can understand it clearly",p:"Owl",m:"Maximize"}
+    ]},
+  { id:7, text:"How would you describe your experience with the many Travel and Leisure benefits so far?", type:"dual",
+    answers:[
+      {text:"Good, but I know there's more potential I may not be using yet",p:"Lion",m:"Maximize"},
+      {text:"It works well for me overall, and I mainly want it to stay simple and useful",p:"Otter",m:"NoHassle"},
+      {text:"I value the consistency and reliability of using it the way I already know",p:"Retriever",m:"NoHassle"},
+      {text:"I like to track how it's performing and whether I'm getting the most from my dues each year",p:"Owl",m:"Maximize"}
+    ]},
+  { id:8, text:"When new options or improvements are introduced, what matters most and how do you prefer they are presented?", type:"dual",
+    answers:[
+      {text:"Show me the strongest option with a quick summary so I can act fast",p:"Lion",m:"Maximize"},
+      {text:"Help me understand how it fits my situation and goals",p:"Otter",m:"NoHassle"},
+      {text:"Keep it simple, straightforward, and easy to follow step-by-step",p:"Retriever",m:"NoHassle"},
+      {text:"Provide a clear breakdown so I can review the details before deciding",p:"Owl",m:"Maximize"}
+    ]},
+  { id:9, text:"What does a great experience look like to you?", type:"dual",
+    answers:[
+      {text:"Efficient, results-focused, and respectful of my time",p:"Lion",m:"Maximize"},
+      {text:"Personalized, enjoyable, and fitting my lifestyle",p:"Otter",m:"NoHassle"},
+      {text:"Easy, consistent, and stress-free",p:"Retriever",m:"NoHassle"},
+      {text:"Clear, transparent, and delivered as expected",p:"Owl",m:"Maximize"}
+    ]},
+  { id:10, text:"When thinking about long-term value, what matters most?", type:"dual",
+    answers:[
+      {text:"Maximizing outcomes and opportunities over time",p:"Lion",m:"Maximize"},
+      {text:"Keeping things aligned with my lifestyle and plans",p:"Otter",m:"NoHassle"},
+      {text:"Maintaining stability and predictability",p:"Retriever",m:"NoHassle"},
+      {text:"Ensuring everything makes sense financially and strategically",p:"Owl",m:"Maximize"}
+    ]},
+  { id:11, text:"If we could improve one thing for you moving forward, what would matter most?", type:"dual",
+    answers:[
+      {text:"Stronger results or performance",p:"Lion",m:"Maximize"},
+      {text:"Better fit for my personal situation",p:"Otter",m:"NoHassle"},
+      {text:"Easier, smoother experience",p:"Retriever",m:"NoHassle"},
+      {text:"More clarity and transparency",p:"Owl",m:"Maximize"}
+    ]},
+  { id:12, text:"If you cannot get availability where you want it, what do you typically do?", type:"context",
+    answers:[
+      {text:"Adjust my travel dates to match availability"},
+      {text:"Piece things together using waitlists or partial bookings"},
+      {text:"Book a hotel using Wyndham Rewards points"},
+      {text:"Book other accommodations out of pocket"},
+      {text:"Skip the trip or make alternate plans"}
+    ]},
+  { id:13, text:"Outside of your ownership, about how much do you typically spend on travel each year?", type:"context",
+    answers:[
+      {text:"Under $1,000"},
+      {text:"$2,000 – $3,000"},
+      {text:"$3,000 – $8,000"},
+      {text:"$8,000+"}
+    ]},
+  { id:14, text:"If you have extra credits at the end of the year, how do you usually handle them?", type:"context",
+    answers:[
+      {text:"Roll them over and plan to use more next year"},
+      {text:"Let them expire"},
+      {text:"Donate them to a cause"},
+      {text:"Convert or use them through external exchange or Wyndham Rewards options"},
+      {text:"Let friends or family use them"}
+    ]}
+];
+
+var VIP_LEVELS = [
+  {val:'3rdparty', label:'3rd Party / Ineligible', grey:true, exclusive:true},
+  {val:'base', label:'Standard Worldmark Benefits', grey:true, vipName:'Standard', vipColor:'rgba(240,236,228,0.45)'},
+  {val:'bronze', label:'Bronze VIP', vipName:'Bronze VIP', vipColor:'#cd7f32'},
+  {val:'silver', label:'Silver VIP', vipName:'Silver VIP', vipColor:'#a8b8c8'},
+  {val:'diamond', label:'Diamond VIP', vipName:'Diamond VIP', vipColor:'#88c8e8'},
+  {val:'platinum', label:'Platinum VIP', vipName:'Platinum VIP', vipColor:'#e8eef4'},
+  {val:'founders', label:'Founders VIP', vipName:'Founders VIP', vipColor:'#9d7fd4'},
+  {val:'eddie-bauer', label:'Eddie Bauer Adventure Club', eb:true}
+];
+
+var RESORT_SYSTEMS = [
+  {val:'clubwyndham', label:'Club Wyndham'},
+  {val:'shell', label:'Shell Vacations'},
+  {val:'margaritaville', label:'Margaritaville'},
+  {val:'southpacific', label:'South Pacific Club'},
+  {val:'worldmark', label:'Worldmark the Club'}
+];
+
+var DISPLAY_VIP = ['bronze','silver','diamond','platinum','founders','base'];
+
+// ─── SCORING ─────────────────────────────────────────────────────────────────
+function scorePerson(answers, personKey, disc) {
+  // personKey: 'primary' or 'secondary'
+  var sc = {Lion:0, Otter:0, Retriever:0, Owl:0};
+  var ms = {Maximize:0, NoHassle:0};
+  var q4txt = ''; var owlQ = false;
+  QUESTIONS.forEach(function(q, qi) {
+    var a = answers[qi];
+    if (!a) return;
+    if (q.type === 'open') { q4txt = a.open || ''; return; }
+    if (q.type === 'context') { return; } // Q12-14: context only, not scored
+    var chosen = a[personKey]; // primary or secondary selection index
+    if (chosen !== null && q.answers[chosen]) {
+      sc[q.answers[chosen].p] += 2;
+      ms[q.answers[chosen].m] += 2;
+    }
+    // If only one person (no secondary field used), also score secondary for primary person
+    if (personKey === 'primary' && a.secondary !== null && !S.twoPersonMode) {
+      if (q.answers[a.secondary]) {
+        sc[q.answers[a.secondary].p] += 1;
+        ms[q.answers[a.secondary].m] += 1;
+      }
+    }
+    if (qi === 8 && chosen === 3) owlQ = true; // Q9 delay signal
+  });
+  var sorted = Object.keys(sc).sort(function(a,b){return sc[b]-sc[a];});
+  var top = sorted[0]; var second = sorted[1];
+  var isHybrid = sc[top] - sc[second] <= 2 && sc[second] > 0;
+  var totalMs = ms.Maximize + ms.NoHassle;
+  var mindset = 'Balanced';
+  if (totalMs > 0) { var r = ms.Maximize/totalMs; if(r>0.6) mindset='Maximize'; else if(r<0.4) mindset='No-Hassle'; }
+  var noPattern = sc[top] <= 3;
+  var q4friction = q4txt.length > 0 && /frustrat|disappoint|difficult|hard|problem|issue|bad|terrible|worst|annoying|never|doesn't work/i.test(q4txt);
+  var guarded = disc && disc.guarded;
+  var jt = 0;
+  if (guarded) jt++; if (q4friction) jt++; if (noPattern) jt++; if (owlQ) jt++;
+  var jackal = jt >= 2;
+  var intConf = disc && disc.usage==='internal'?'High':disc&&disc.usage==='mixed'?'Medium':'Low';
+  var extConf = disc && disc.usage==='external'?'High':disc&&disc.usage==='mixed'?'Medium':'Low';
+  var DESC = {
+    Lion:{pure:'The Decider',withOtter:'Driver & Connector',withRetriever:'Driven Loyalist',withOwl:'Strategic Commander'},
+    Otter:{pure:'The Enthusiast',withLion:'Driver & Connector',withRetriever:'Warm Connector',withOwl:'Curious Analyst'},
+    Retriever:{pure:'The Steady',withLion:'Driven Loyalist',withOtter:'Warm Connector',withOwl:'Careful Planner'},
+    Owl:{pure:'The Analyst',withLion:'Strategic Commander',withOtter:'Curious Analyst',withRetriever:'Careful Planner'}
+  };
+  var desc = isHybrid ? (DESC[top]['with'+second] || top+' / '+second) : DESC[top].pure;
+  var SHAPES = {
+    Lion:{color:'rgba(201,168,76,0.15)',type:'tri'},
+    Otter:{color:'rgba(232,201,122,0.13)',type:'circ'},
+    Retriever:{color:'rgba(134,224,168,0.1)',type:'rect'},
+    Owl:{color:'rgba(136,200,232,0.12)',type:'hex'}
+  };
+  var PB = {
+    Lion:{communicate:['Lead with outcomes, not process','Be direct and confident','Match their energy, then slow deliberately'],trust:['Show them the best option clearly','Acknowledge their decisiveness','Let them feel in control'],movement:['Present an exclusive opportunity','Show what they are currently missing'],avoid:['Over-explaining','Wasting their time with small talk']},
+    Otter:{communicate:['Make it feel personal and exciting','Use stories and examples','Show enthusiasm'],trust:['Make them feel special and valued','Share experiences from others like them','Keep energy positive'],movement:['Create excitement around the opportunity','Appeal to their lifestyle vision'],avoid:['Getting too technical','Being overly formal or stiff']},
+    Retriever:{communicate:['Be warm and reassuring','Move at a comfortable pace','Emphasize continuity and loyalty'],trust:['Honor their history with the brand','Show consistency and reliability','Avoid pressure'],movement:['Frame as a natural next step','Emphasize how smooth the process will be'],avoid:['High pressure tactics','Rushing the conversation']},
+    Owl:{communicate:['Provide detail and logic','Give them time to process','Answer questions thoroughly'],trust:['Show proof and data','Be transparent about process','Respect their analytical nature'],movement:['Give them a framework for deciding','Allow time to review before committing'],avoid:['Skipping details','Pushing for a fast decision']}
+  };
+  var ANGLES = {
+    Lion:[
+      "Gap between current usage and what their level was built to deliver",
+      "Position them as someone who should always have the best available",
+      "Show them what others at their level are doing differently"
+    ],
+    Otter:[
+      "Paint a vision of what their travel life could look like",
+      "Connect the opportunity to their family and experiences",
+      "Make them feel like they are part of something exclusive"
+    ],
+    Retriever:[
+      "Acknowledge their loyalty and how long they have been with you",
+      "Show how this is a natural evolution of what they already have",
+      "Reassure them the process is simple and familiar"
+    ],
+    Owl:[
+      "Walk through the math and long-term value clearly",
+      "Address the gap between what they pay and what they get",
+      "Give them a structured way to evaluate the decision"
+    ]
+  };
+  var CURIOSITY = {
+    Lion:[
+      "If you could design your ideal ownership experience, what would be different?",
+      "There is something most owners at your level have not heard about yet — I want to show you.",
+      "What would it mean for you if this concern just went away?"
+    ],
+    Otter:[
+      "If time and availability were not limitations, how would you be using this?",
+      "There are things that have changed that most owners do not know about yet.",
+      "I want to show you something that usually gets people excited."
+    ],
+    Retriever:[
+      "You have been with us long enough to deserve the full picture — can I show you something?",
+      "What would make this feel completely right for where you are in life right now?",
+      "There is a path that a lot of long-term owners have taken that might make sense for you."
+    ],
+    Owl:[
+      "What would you need to see to feel fully confident moving forward?",
+      "I want to walk you through exactly how this works — most people do not know these details exist.",
+      "If the numbers made sense, what else would matter to you?"
+    ]
+  };
+  return {
+    desc:desc, isHybrid:isHybrid, top:top, second:second, mindset:mindset,
+    jackal:jackal, intConf:intConf, extConf:extConf,
+    pb:PB[top], shapes:[SHAPES[top], isHybrid?SHAPES[second]:null],
+    angles:ANGLES[top], curiosity:CURIOSITY[top], q4txt:q4txt, scores:sc
+  };
+}
+
+function scoreSession(answers, disc) {
+  var p1 = scorePerson(answers, 'primary', disc);
+  var p2 = S.twoPersonMode ? scorePerson(answers, 'secondary', disc) : null;
+  // Combined Jackal: if either person triggers it
+  var jackal = p1.jackal || (p2 && p2.jackal);
+  return { p1:p1, p2:p2, jackal:jackal, twoPersonMode:S.twoPersonMode, intConf:p1.intConf, extConf:p1.extConf };
+}
+
+function calcPGM(monthly) {
+  var m = parseFloat(monthly) || 0;
+  var annual = Math.round(m * 12);
+  var cumulative = 0;
+  var rows = [];
+  for (var y = 1; y <= 20; y++) {
+    if (y > 1 && y <= 3) annual = Math.round(annual * 1.05);
+    else if (y > 3 && y <= 8) annual = Math.round(annual * 1.07);
+    else if (y > 8) annual = Math.round(annual * 1.092);
+    cumulative += annual;
+    rows.push({y:y, annual:annual, cumulative:cumulative});
+  }
+  return rows;
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function h(tag, attrs, children) {
+  var el = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function(k) {
+    if (k === 'className') el.className = attrs[k];
+    else if (k === 'style') Object.assign(el.style, attrs[k]);
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(), attrs[k]);
+    else if (k === 'inputmode') el.setAttribute('inputmode', attrs[k]);
+    else el.setAttribute(k, attrs[k]);
+  });
+  if (children) {
+    if (typeof children === 'string') el.innerHTML = children;
+    else if (Array.isArray(children)) children.forEach(function(c) { if(c) el.appendChild(c); });
+    else el.appendChild(children);
+  }
+  return el;
+}
+function t(text) { return document.createTextNode(text); }
+function fmtNum(n) { return n.toLocaleString('en-US'); }
+
+function ebStar(active, size) {
+  size = size || 54;
+  var wrap = h('div', {className:'eb-wrap'});
+  var frame = h('div', {className:'eb-star-frame', style:{width:size+'px',height:size+'px'}});
+  var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 52 52');
+  svg.style.cssText = 'position:absolute;inset:0;width:'+size+'px;height:'+size+'px;';
+  var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d','M26 4l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3-10.9-5.8-10.9 5.8 2.1-12.3-8.9-8.7 12.3-1.8z');
+  path.setAttribute('fill', active ? 'var(--gold)' : 'rgba(255,255,255,0.09)');
+  svg.appendChild(path);
+  frame.appendChild(svg);
+  var nr = h('div', {className:'eb-name-row'});
+  ['Eddie','Bauer'].forEach(function(w){
+    var sp = h('span',{className:'eb-t'});
+    sp.textContent = w;
+    sp.style.color = active ? 'var(--gold-light)' : 'rgba(240,236,228,0.22)';
+    nr.appendChild(sp);
+  });
+  var cap = h('div',{className:'eb-cap'});
+  cap.textContent = 'Adventure Club';
+  if (active) cap.style.color = 'var(--gold)';
+  wrap.appendChild(frame); wrap.appendChild(nr); wrap.appendChild(cap);
+  return wrap;
+}
+
+function ownerHeader(intake) {
+  var wrap = h('div',{className:'owner-strip-wrap'});
+  var main = h('div',{className:'owner-strip-main'});
+  var left = h('div');
+  var nameEl = h('div',{className:'owner-name'});
+  nameEl.textContent = intake.ownerName || 'Owner';
+  var numEl = h('div',{className:'owner-num'});
+  numEl.textContent = intake.ownerNum ? 'Owner # '+intake.ownerNum : 'Account #';
+  left.appendChild(nameEl); left.appendChild(numEl);
+  var right = h('div',{className:'owner-right'});
+  var vipCfg = VIP_LEVELS.find(function(v){return v.val===intake.vipLevel;});
+  if (intake.vipLevel && DISPLAY_VIP.indexOf(intake.vipLevel) > -1 && vipCfg) {
+    var vb = h('div',{className:'vip-block'});
+    var vp = h('div',{className:'vip-prefix'}); vp.textContent='Worldmark'; vb.appendChild(vp);
+    var vn = h('div',{className:'vip-name-disp'});
+    vn.textContent = vipCfg.vipName; vn.style.color = vipCfg.vipColor;
+    vn.style.fontWeight = intake.vipLevel==='base'?'400':'600';
+    vb.appendChild(vn); right.appendChild(vb);
+  }
+  right.appendChild(ebStar(intake.ebSelected));
+  main.appendChild(left); main.appendChild(right);
+  wrap.appendChild(main);
+  var opRow = h('div',{className:'other-products-row'});
+  var oplbl = h('span',{className:'op-label'}); oplbl.textContent='Other Products'; opRow.appendChild(oplbl);
+  RESORT_SYSTEMS.forEach(function(r){
+    var tag = h('span',{className:'ctag gold'+(intake.resort.indexOf(r.val)>-1?' lit':'')});
+    tag.textContent = r.label; opRow.appendChild(tag);
+  });
+  wrap.appendChild(opRow);
+  return wrap;
+}
+
+function topBar(label, stepTxt, showDots) {
+  var bar = h('div',{className:'top-bar'});
+  var left = h('div',{style:{display:'flex',alignItems:'center'}});
+  var dot = h('span',{className:'rep-dot'}); left.appendChild(dot);
+  var lbl = h('span',{className:'rep-label'}); lbl.textContent='Rep View'; left.appendChild(lbl);
+  bar.appendChild(left);
+  var right = h('div',{style:{display:'flex',alignItems:'center',gap:'12px'}});
+  var sl = h('span',{className:'step-label'}); sl.textContent=stepTxt; right.appendChild(sl);
+  if (showDots) {
+    var db = h('div',{className:'three-dot-btn',onclick:function(){openOverlay();}});
+    for(var i=0;i<3;i++){db.appendChild(h('div',{className:'dot-sh'}));}
+    right.appendChild(db);
+  }
+  bar.appendChild(right);
+  return bar;
+}
+
+// ─── STEP 1 ───────────────────────────────────────────────────────────────────
+function renderStep1() {
+  // Only do full render if screen not already built
+  if (document.getElementById('step1-screen')) {
+    updateStep1Chips();
+    return;
+  }
+  buildStep1();
+}
+
+function updateStep1Chips() {
+  // Update only chip/tile selected states without touching input fields
+  // VIP tiles
+  VIP_LEVELS.forEach(function(v){
+    var el = document.querySelector('[data-vip="'+v.val+'"]');
+    if(!el) return;
+    var isSel = v.eb ? S.intake.ebSelected : (v.val==='3rdparty' ? S.intake.ineligSelected : S.intake.vipLevel===v.val);
+    el.className = 'vip-tile' + (isSel ? (v.eb?' sel-eb':' sel') : '');
+    var tc = el.querySelector('.tile-check');
+    if(tc) tc.innerHTML = isSel ? '<svg width="8" height="6" viewBox="0 0 8 6"><path d="M1 3L3 5L7 1" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"/></svg>' : '';
+  });
+  // Resort tiles
+  RESORT_SYSTEMS.forEach(function(r){
+    var el = document.querySelector('[data-resort="'+r.val+'"]');
+    if(!el) return;
+    var isSel = S.intake.resort.indexOf(r.val)>-1;
+    el.className = 'vip-tile' + (isSel?' sel':'');
+    var tc = el.querySelector('.tile-check');
+    if(tc) tc.innerHTML = isSel ? '<svg width="8" height="6" viewBox="0 0 8 6"><path d="M1 3L3 5L7 1" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"/></svg>' : '';
+  });
+  // Tour type chips
+  ['Priority 1','Priority 2','Standard','Frequent'].forEach(function(t){
+    var el = document.querySelector('[data-tour="'+t+'"]');
+    if(!el) return;
+    var isSel = S.intake.tourTypes && S.intake.tourTypes.indexOf(t)>-1;
+    el.className = 'chip' + (isSel?' sel':'');
+  });
+  // Contract chips
+  ['grandfathered','pool'].forEach(function(c){
+    var el = document.querySelector('[data-contract="'+c+'"]');
+    if(!el) return;
+    el.className = 'chip' + (S.intake.contract.indexOf(c)>-1?' sel':'');
+  });
+  // Legacy chips
+  ['legacy','nonlegacy'].forEach(function(c){
+    var el = document.querySelector('[data-legacy="'+c+'"]');
+    if(!el) return;
+    el.className = 'chip' + (S.intake.legacy===c?' sel':'');
+  });
+  // Contract header tags
+  var tgG = document.getElementById('hdr-tag-grandfathered');
+  var tgP = document.getElementById('hdr-tag-pool');
+  var tgL = document.getElementById('hdr-tag-legacy');
+  var tgNL = document.getElementById('hdr-tag-nonlegacy');
+  if(tgG) tgG.className = 'ctag green'+(S.intake.contract.indexOf('grandfathered')>-1?' lit':'');
+  if(tgP) tgP.className = 'ctag green'+(S.intake.contract.indexOf('pool')>-1?' lit':'');
+  if(tgL) tgL.className = 'ctag blue'+(S.intake.legacy==='legacy'?' lit':'');
+  if(tgNL) tgNL.className = 'ctag blue'+(S.intake.legacy==='nonlegacy'?' lit':'');
+  // Other products header tags
+  RESORT_SYSTEMS.forEach(function(r){
+    var el = document.getElementById('hdr-resort-'+r.val);
+    if(el) el.className = 'ctag gold'+(S.intake.resort.indexOf(r.val)>-1?' lit':'');
+  });
+  // VIP display block
+  updateVipDispBlock(document.getElementById('vip-disp-block'));
+  // EB star
+  updateEbStar();
+  // 3rd party warning
+  var wd = document.getElementById('warn-div');
+  if(wd) wd.style.display = S.intake.ineligSelected ? 'flex' : 'none';
+  // Begin button
+  updateBeginBtn();
+}
+
+function updateBeginBtn() {
+  var btn = document.getElementById('begin-btn');
+  if(!btn) return;
+  var rdCount = S.intake.vipLevel || S.intake.resort.length>0 ? 1 : 0;
+  btn.disabled = rdCount < 1;
+  btn.style.opacity = rdCount >= 1 ? '1' : '0.3';
+  var rdTxt = document.getElementById('readiness-txt');
+  if(rdTxt) rdTxt.innerHTML = '<b>'+(rdCount>=1?'1':'0')+'</b> of 1 required';
+}
+
+function updateEbStar() {
+  var frame = document.getElementById('eb-star-path');
+  var t1 = document.getElementById('eb-t1');
+  var t2 = document.getElementById('eb-t2');
+  var cap = document.getElementById('eb-cap-main');
+  if(frame) frame.setAttribute('fill', S.intake.ebSelected ? 'var(--gold)' : 'rgba(255,255,255,0.09)');
+  if(t1) t1.style.color = S.intake.ebSelected ? 'var(--gold-light)' : 'rgba(240,236,228,0.22)';
+  if(t2) t2.style.color = S.intake.ebSelected ? 'var(--gold-light)' : 'rgba(240,236,228,0.22)';
+  if(cap) cap.style.color = S.intake.ebSelected ? 'var(--gold)' : '';
+}
+
+function updateVipDispBlock(el) {
+  el.innerHTML='';
+  var vipCfg = VIP_LEVELS.find(function(v){return v.val===S.intake.vipLevel;});
+  if (S.intake.vipLevel && DISPLAY_VIP.indexOf(S.intake.vipLevel)>-1 && vipCfg) {
+    var p = h('div',{className:'vip-disp-prefix'}); p.textContent='Worldmark'; el.appendChild(p);
+    var n = h('div',{className:'vip-disp-name'}); n.textContent=vipCfg.vipName; n.style.color=vipCfg.vipColor;
+    n.style.fontWeight=S.intake.vipLevel==='base'?'400':'600'; el.appendChild(n);
+  }
+}
+
+function buildStep1() {
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+  var screen = h('div',{className:'screen', id:'step1-screen'});
+  screen.appendChild(topBar('Rep View','Pre-session intake — Step 1 of 5',false));
+
+  // Owner input strip
+  var istrip = h('div',{style:{background:'var(--navy-card)',borderBottom:'1px solid var(--card-border)',padding:'14px 20px',display:'grid',gridTemplateColumns:'1fr auto',gap:'14px',alignItems:'start',flexShrink:'0'}});
+  var ileft = h('div',{style:{display:'flex',flexDirection:'column',gap:'6px'}});
+  var nameInp = h('input',{className:'owner-inp',placeholder:'Owner last name',type:'text'});
+  nameInp.value = S.intake.ownerName;
+  nameInp.addEventListener('input',function(){S.intake.ownerName=nameInp.value;});
+  var numRow = h('div',{style:{display:'flex',alignItems:'center',gap:'5px'}});
+  var numPfx = h('span',{style:{fontSize:'12px',color:'var(--text-muted)',fontWeight:'300',flexShrink:'0'}}); numPfx.textContent='Owner #';
+  var numInp = h('input',{className:'num-inp',placeholder:'Account number',type:'text'});
+  numInp.value = S.intake.ownerNum;
+  numInp.addEventListener('input',function(){S.intake.ownerNum=numInp.value;});
+  numRow.appendChild(numPfx); numRow.appendChild(numInp);
+  var creditDiv = h('div',{style:{display:'flex',flexDirection:'column',gap:'4px',marginTop:'4px'}});
+  var cr1 = h('div',{className:'credit-row'});
+  var cl1 = h('span',{className:'credit-lbl'}); cl1.textContent='VIP / Standard Credits';
+  var ci1 = h('input',{className:'credit-inp',type:'text',placeholder:'0'}); ci1.value = S.intake.creditsVip;
+  ci1.addEventListener('input',function(){S.intake.creditsVip=ci1.value;});
+  cr1.appendChild(cl1); cr1.appendChild(ci1); creditDiv.appendChild(cr1);
+  var cr2 = h('div',{className:'credit-row'});
+  var cl2 = h('span',{className:'credit-lbl'}); cl2.textContent='Ineligible Credits';
+  var ci2 = h('input',{className:'credit-inp',type:'text',placeholder:'0'}); ci2.value = S.intake.creditsInelig;
+  ci2.addEventListener('input',function(){S.intake.creditsInelig=ci2.value;});
+  cr2.appendChild(cl2); cr2.appendChild(ci2); creditDiv.appendChild(cr2);
+  var cr3 = h('div',{className:'credit-row',id:'eb-credits-row',style:{display:S.intake.ebSelected?'flex':'none'}});
+  var cl3 = h('span',{className:'credit-lbl'}); cl3.textContent='Eddie Bauer Credits';
+  var ci3 = h('input',{className:'credit-inp',type:'text',placeholder:'0'}); ci3.value = S.intake.ebCredits||'';
+  ci3.addEventListener('input',function(){S.intake.ebCredits=ci3.value;});
+  cr3.appendChild(cl3); cr3.appendChild(ci3); creditDiv.appendChild(cr3);
+  var warnDiv = h('div',{className:'warn-row', id:'warn-div', style:{display: S.intake.vipLevel==='3rdparty'?'flex':'none'}});
+  var wt = h('span',{className:'warn-tag'}); wt.textContent='3rd Party / Ineligible';
+  var wn = h('span',{className:'warn-note'}); wn.textContent='Cannot roll into VIP';
+  warnDiv.appendChild(wt); warnDiv.appendChild(wn);
+  ileft.appendChild(nameInp); ileft.appendChild(numRow); ileft.appendChild(creditDiv); ileft.appendChild(warnDiv);
+
+  // Right side of strip
+  var iright = h('div',{style:{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'8px'}});
+  var cblk = h('div',{style:{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'4px'}});
+  var clbl = h('div',{style:{fontSize:'11px',color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'.1em'}}); clbl.textContent='Contract';
+  var crow1 = h('div',{style:{display:'flex',gap:'4px',flexWrap:'wrap',justifyContent:'flex-end'}});
+  var tgG = h('span',{className:'ctag green'+(S.intake.contract.indexOf('grandfathered')>-1?' lit':''), id:'hdr-tag-grandfathered', onclick:function(){toggleContract('grandfathered');}}); tgG.textContent='Grandfathered';
+  var tgP = h('span',{className:'ctag green'+(S.intake.contract.indexOf('pool')>-1?' lit':''), id:'hdr-tag-pool', onclick:function(){toggleContract('pool');}}); tgP.textContent='Pool Available';
+  crow1.appendChild(tgG); crow1.appendChild(tgP);
+  var crow2 = h('div',{style:{display:'flex',gap:'4px',flexWrap:'wrap',justifyContent:'flex-end'}});
+  var tgL = h('span',{className:'ctag blue'+(S.intake.legacy==='legacy'?' lit':''), id:'hdr-tag-legacy', onclick:function(){toggleLegacy('legacy');}}); tgL.textContent='Legacy';
+  var tgNL = h('span',{className:'ctag blue'+(S.intake.legacy==='nonlegacy'?' lit':''), id:'hdr-tag-nonlegacy', onclick:function(){toggleLegacy('nonlegacy');}}); tgNL.textContent='Non-Legacy';
+  crow2.appendChild(tgL); crow2.appendChild(tgNL);
+  cblk.appendChild(clbl); cblk.appendChild(crow1); cblk.appendChild(crow2); iright.appendChild(cblk);
+  // Fee
+  var fblk = h('div',{style:{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'2px'}});
+  var flbl = h('div',{style:{fontSize:'10px',color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'.1em'}}); flbl.textContent='Monthly Maintenance';
+  var frow = h('div',{style:{display:'flex',alignItems:'baseline',gap:'2px'}});
+  var fpfx = h('span',{style:{fontSize:'16px',color:'var(--gold)',fontWeight:'300'}}); fpfx.textContent='$';
+  var fInp = h('input',{className:'fee-inp',type:'text',placeholder:'000'});
+  fInp.value = S.intake.fee;
+  fInp.addEventListener('input',function(){S.intake.fee=fInp.value;});
+  var fsub = h('div',{style:{fontSize:'10px',color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'.06em'}}); fsub.textContent='per month';
+  frow.appendChild(fpfx); frow.appendChild(fInp);
+  fblk.appendChild(flbl); fblk.appendChild(frow); fblk.appendChild(fsub); iright.appendChild(fblk);
+  // VIP display
+  var vdb = h('div',{className:'vip-disp-block', id:'vip-disp-block'});
+  updateVipDispBlock(vdb);
+  iright.appendChild(vdb);
+  // EB star (with IDs for surgical update)
+  var ebWrap = h('div',{className:'eb-wrap'});
+  var ebFrame = h('div',{className:'eb-star-frame'});
+  var ebSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  ebSvg.setAttribute('viewBox','0 0 52 52');
+  ebSvg.style.cssText='position:absolute;inset:0;width:54px;height:54px;';
+  var ebPath = document.createElementNS('http://www.w3.org/2000/svg','path');
+  ebPath.setAttribute('d','M26 4l5.5 11.2 12.3 1.8-8.9 8.7 2.1 12.3-10.9-5.8-10.9 5.8 2.1-12.3-8.9-8.7 12.3-1.8z');
+  ebPath.setAttribute('fill', S.intake.ebSelected ? 'var(--gold)' : 'rgba(255,255,255,0.09)');
+  ebPath.id = 'eb-star-path';
+  ebSvg.appendChild(ebPath); ebFrame.appendChild(ebSvg); ebWrap.appendChild(ebFrame);
+  var ebNr = h('div',{className:'eb-name-row'});
+  var ebT1 = h('span',{className:'eb-t', id:'eb-t1'}); ebT1.textContent='Eddie'; ebT1.style.color=S.intake.ebSelected?'var(--gold-light)':'rgba(240,236,228,0.22)';
+  var ebT2 = h('span',{className:'eb-t', id:'eb-t2'}); ebT2.textContent='Bauer'; ebT2.style.color=S.intake.ebSelected?'var(--gold-light)':'rgba(240,236,228,0.22)';
+  ebNr.appendChild(ebT1); ebNr.appendChild(ebT2); ebWrap.appendChild(ebNr);
+  var ebCap = h('div',{className:'eb-cap', id:'eb-cap-main'}); ebCap.textContent='Adventure Club';
+  if(S.intake.ebSelected) ebCap.style.color='var(--gold)';
+  ebWrap.appendChild(ebCap); iright.appendChild(ebWrap);
+  istrip.appendChild(ileft); istrip.appendChild(iright);
+  screen.appendChild(istrip);
+
+  var scroll = h('div',{className:'scroll-area'});
+  var inner = h('div',{style:{padding:'18px 20px',display:'flex',flexDirection:'column',gap:'18px'}});
+
+  // Other products
+  var opBlk = h('div');
+  var opLbl = h('div',{className:'section-label'}); opLbl.textContent='Other Products'; opBlk.appendChild(opLbl);
+  var opRow = h('div',{style:{display:'flex',gap:'6px',flexWrap:'wrap'}});
+  RESORT_SYSTEMS.forEach(function(r){
+    var tag = h('span',{className:'ctag gold'+(S.intake.resort.indexOf(r.val)>-1?' lit':''), id:'hdr-resort-'+r.val, onclick:function(){toggleResort(r.val);}});
+    tag.textContent = r.label; opRow.appendChild(tag);
+  });
+  opBlk.appendChild(opRow); inner.appendChild(opBlk);
+  inner.appendChild(h('div',{className:'divider'}));
+
+  // Tour history
+  var th = h('div'); var thLbl = h('div',{className:'section-label'}); thLbl.textContent='Tour history'; th.appendChild(thLbl);
+  var thRow = h('div',{className:'chip-row'});
+  ['Priority 1','Priority 2','Standard','Frequent'].forEach(function(t){
+    var isSel = S.intake.tourTypes && S.intake.tourTypes.indexOf(t)>-1;
+    var c = h('span',{className:'chip'+(isSel?' sel':'')});
+    c.setAttribute('data-tour',t);
+    c.textContent=t;
+    c.addEventListener('click',function(){
+      if(!S.intake.tourTypes) S.intake.tourTypes=[];
+      var idx=S.intake.tourTypes.indexOf(t);
+      if(idx>-1) S.intake.tourTypes.splice(idx,1); else S.intake.tourTypes.push(t);
+      c.className='chip'+(S.intake.tourTypes.indexOf(t)>-1?' sel':'');
+    });
+    thRow.appendChild(c);
+  });
+  var dateInp = h('input',{className:'date-inp',placeholder:'Last tour date',type:'text'});
+  dateInp.value = S.intake.tourDate;
+  dateInp.addEventListener('input',function(){S.intake.tourDate=dateInp.value;});
+  thRow.appendChild(dateInp); th.appendChild(thRow); inner.appendChild(th);
+  inner.appendChild(h('div',{className:'divider'}));
+
+  // Home resort system
+  var hrs = h('div'); var hrsLbl = h('div',{className:'section-label'}); hrsLbl.textContent='Home resort system'; hrs.appendChild(hrsLbl);
+  var hrsGrid = h('div',{className:'tile-grid'});
+  RESORT_SYSTEMS.forEach(function(r){
+    var tile = h('div',{className:'vip-tile'+(S.intake.resort.indexOf(r.val)>-1?' sel':'')});
+    tile.setAttribute('data-resort',r.val);
+    var tn = h('div',{className:'tile-name'}); tn.textContent=r.label;
+    var tc = h('div',{className:'tile-check'});
+    if(S.intake.resort.indexOf(r.val)>-1){tc.innerHTML='<svg width="8" height="6" viewBox="0 0 8 6"><path d="M1 3L3 5L7 1" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"/></svg>';}
+    tile.appendChild(tn); tile.appendChild(tc);
+    tile.addEventListener('click',function(){toggleResort(r.val);});
+    hrsGrid.appendChild(tile);
+  });
+  hrs.appendChild(hrsGrid); inner.appendChild(hrs);
+  inner.appendChild(h('div',{className:'divider'}));
+
+  // Ownership level
+  var ovl = h('div'); var ovlLbl = h('div',{className:'section-label'}); ovlLbl.textContent='Ownership level'; ovl.appendChild(ovlLbl);
+  var ovlGrid = h('div',{className:'tile-grid'});
+  VIP_LEVELS.forEach(function(v){
+    var isSel = v.eb ? S.intake.ebSelected : (v.val==='3rdparty' ? S.intake.ineligSelected : S.intake.vipLevel===v.val);
+    var tile = h('div',{className:'vip-tile'+(isSel?(v.eb?' sel-eb':' sel'):'')});
+    tile.setAttribute('data-vip',v.val);
+    var tn = h('div',{className:'tile-name'}); tn.textContent=v.label;
+    var tc = h('div',{className:'tile-check'});
+    if(isSel){tc.innerHTML='<svg width="8" height="6" viewBox="0 0 8 6"><path d="M1 3L3 5L7 1" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"/></svg>';}
+    tile.appendChild(tn); tile.appendChild(tc);
+    tile.addEventListener('click',function(){selectVipLevel(v.val);});
+    ovlGrid.appendChild(tile);
+  });
+  var ovlNote = h('div',{style:{fontSize:'11px',color:'var(--text-muted)',fontWeight:'300',paddingLeft:'2px',marginTop:'4px'}});
+  ovlNote.textContent='VIP levels are single-select. Eddie Bauer may be combined with any level.';
+  ovl.appendChild(ovlGrid); ovl.appendChild(ovlNote); inner.appendChild(ovl);
+  inner.appendChild(h('div',{className:'divider'}));
+
+  // Contract type
+  var ct = h('div'); var ctLbl = h('div',{className:'section-label'}); ctLbl.textContent='Contract type'; ct.appendChild(ctLbl);
+  var ctRow = h('div',{className:'chip-row'});
+  [['grandfathered','Grandfathered'],['pool','Pool Available']].forEach(function(c){
+    var chip = h('span',{className:'chip'+(S.intake.contract.indexOf(c[0])>-1?' sel':'')});
+    chip.setAttribute('data-contract',c[0]);
+    chip.textContent=c[1];
+    chip.addEventListener('click',function(){toggleContract(c[0]);});
+    ctRow.appendChild(chip);
+  });
+  [['legacy','Legacy'],['nonlegacy','Non-Legacy']].forEach(function(c){
+    var chip = h('span',{className:'chip'+(S.intake.legacy===c[0]?' sel':'')});
+    chip.setAttribute('data-legacy',c[0]);
+    chip.textContent=c[1];
+    chip.addEventListener('click',function(){toggleLegacy(c[0]);});
+    ctRow.appendChild(chip);
+  });
+  ct.appendChild(ctRow); inner.appendChild(ct);
+  scroll.appendChild(inner); screen.appendChild(scroll);
+
+  // Footer
+  var foot = h('div',{className:'footer-bar'});
+  var rdCount = S.intake.vipLevel || S.intake.resort.length>0 ? 1 : 0;
+  var rdTxt = h('div',{className:'readiness-txt', id:'readiness-txt'}); rdTxt.innerHTML='<b>'+(rdCount>=1?'1':'0')+'</b> of 1 required'; foot.appendChild(rdTxt);
+  var btn = h('button',{className:'btn-primary', id:'begin-btn', onclick:function(){
+    S.step=2; S.q=0; S.answers=QUESTIONS.map(function(){return{primary:null,secondary:null,open:'',contextA:null,contextB:null};});
+    S.surveyDone=false;
+    renderStep2();
+  }}); btn.textContent='Begin Session →'; btn.disabled=rdCount<1; if(rdCount<1)btn.style.opacity='.3';
+  foot.appendChild(btn); screen.appendChild(foot);
+  app.appendChild(screen);
+}
+
+function checkReadiness(){}
+function toggleContract(val){
+  var idx=S.intake.contract.indexOf(val);
+  if(idx>-1)S.intake.contract.splice(idx,1); else S.intake.contract.push(val);
+  updateStep1Chips();
+}
+function toggleLegacy(val){
+  S.intake.legacy=S.intake.legacy===val?null:val;
+  updateStep1Chips();
+}
+function toggleResort(val){
+  var idx=S.intake.resort.indexOf(val);
+  if(idx>-1)S.intake.resort.splice(idx,1); else S.intake.resort.push(val);
+  updateStep1Chips();
+}
+function selectVipLevel(val){
+  var cfg=VIP_LEVELS.find(function(v){return v.val===val;});
+  if(cfg&&cfg.eb){
+    S.intake.ebSelected=!S.intake.ebSelected;
+  } else if(val==='3rdparty'){
+    S.intake.ineligSelected=!S.intake.ineligSelected;
+  } else {
+    S.intake.vipLevel=S.intake.vipLevel===val?null:val;
+  }
+  updateStep1Chips();
+}
+
+// ─── STEP 2 ───────────────────────────────────────────────────────────────────
+function renderStep2() {
+  if (S.surveyDone) { renderSurveyComplete(); return; }
+  var app = document.getElementById('app');
+  app.innerHTML='';
+  var screen = h('div',{className:'screen'});
+  var tb = h('div',{className:'top-bar'});
+  var left = h('div',{style:{display:'flex',alignItems:'center'}});
+  var dot = h('span',{className:'rep-dot'}); left.appendChild(dot);
+  var lbl = h('span',{className:'rep-label'}); lbl.textContent='Ownership Review'; left.appendChild(lbl);
+  tb.appendChild(left);
+  var right = h('div',{style:{display:'flex',alignItems:'center',gap:'10px'}});
+  var dots = h('div',{className:'progress-dots'});
+  QUESTIONS.forEach(function(_,i){
+    var d = h('span',{className:'pdot'+(i<S.q?' done':i===S.q?' active':'')});
+    dots.appendChild(d);
+  });
+  var sl = h('span',{className:'step-label',style:{marginLeft:'6px'}}); sl.textContent=(S.q+1)+' of '+QUESTIONS.length;
+  right.appendChild(dots); right.appendChild(sl); tb.appendChild(right); screen.appendChild(tb);
+  // Two-person mode toggle (rep-facing notice at top of first question only)
+  if (S.q === 0) {
+    var tpm = h('div',{style:{background:'var(--navy-card)',borderBottom:'1px solid var(--card-border)',padding:'10px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:'0'}});
+    var tpmLbl = h('div',{style:{fontSize:'13px',color:'var(--text-muted)',fontWeight:'300'}});
+    tpmLbl.textContent = S.twoPersonMode ? 'Two people — Primary & Secondary scores separate' : 'One person — both answers score together';
+    var tpmBtn = h('span',{style:{fontSize:'12px',color:'var(--gold)',cursor:'pointer',fontWeight:'500',border:'1px solid var(--gold-border)',padding:'4px 10px',borderRadius:'var(--radius-pill)'}});
+    tpmBtn.textContent = S.twoPersonMode ? 'Switch to 1 person' : 'Two people?';
+    tpmBtn.addEventListener('click',function(e){e.stopPropagation();S.twoPersonMode=!S.twoPersonMode;renderStep2();});
+    tpm.appendChild(tpmLbl); tpm.appendChild(tpmBtn); screen.appendChild(tpm);
+  }
+
+  var q = QUESTIONS[S.q];
+  var ans = S.answers[S.q];
+  var isLast = S.q === QUESTIONS.length - 1;
+
+  var body = h('div',{style:{flex:'1',display:'flex',flexDirection:'column',padding:'22px 20px 20px',gap:'0',overflow:'hidden'}});
+  var qnum = h('div',{className:'q-number'}); qnum.textContent='Question '+q.id; body.appendChild(qnum);
+  var qtxt = h('div',{className:'q-text'}); qtxt.textContent=q.text; body.appendChild(qtxt);
+
+  if (q.type==='context') {
+    // Context questions: dual-select (2 answers), not scored
+    var ctxBothSel = ans.contextA !== null && ans.contextB !== null;
+    var ctxOneSel = ans.contextA !== null && ans.contextB === null;
+    var ctxInstr = ctxBothSel ? 'Tap either to change' : ctxOneSel ? 'Select one more' : 'Choose up to two answers';
+    var ctxInstrEl = h('div',{className:'instr-bar'+(ctxBothSel?' rdy':''),style:{textAlign:'left',marginBottom:'10px'}});
+    ctxInstrEl.textContent = ctxInstr; body.appendChild(ctxInstrEl);
+    var ctxWrap = h('div',{style:{flex:'1',overflowY:'auto'}});
+    q.answers.forEach(function(a, ai){
+      var isA = ans.contextA === ai;
+      var isB = ans.contextB === ai;
+      var isSel = isA || isB;
+      var card = h('div',{className:'answer-card'+(isA?' sel-p':isB?' sel-s':''),style:{display:'flex',width:'100%',maxWidth:'600px',marginBottom:'10px'},onclick:function(){
+        if(isA){
+          // deselect A, promote B to A if exists
+          if(ans.contextB !== null){ ans.contextA = ans.contextB; ans.contextB = null; }
+          else { ans.contextA = null; }
+        } else if(isB){
+          ans.contextB = null;
+        } else if(ans.contextA === null){
+          ans.contextA = ai;
+        } else if(ans.contextB === null){
+          ans.contextB = ai;
+        } else {
+          ans.contextB = ai; // replace second
+        }
+        renderStep2();
+      }});
+      var ct = h('div',{className:'card-text'}); ct.textContent=a.text; card.appendChild(ct);
+      if(isA){var bp=h('span',{className:'card-badge badge-p'});bp.textContent='1st';card.appendChild(bp);}
+      if(isB){var bs=h('span',{className:'card-badge badge-s'});bs.textContent='2nd';card.appendChild(bs);}
+      ctxWrap.appendChild(card);
+    });
+    body.appendChild(ctxWrap);
+  } else if (q.type==='dual') {
+    var bothSel = ans.primary!==null && ans.secondary!==null;
+    var oneSel = ans.primary!==null && ans.secondary===null;
+    var instrTxt = bothSel
+      ? 'Tap either card to change'
+      : oneSel
+        ? (S.twoPersonMode ? 'Now tap the second person answer' : 'Now select your secondary choice')
+        : (S.twoPersonMode ? 'First person — tap their most important answer' : 'Tap your most important answer first');
+    var instr = h('div',{className:'instr-bar'+(bothSel?' rdy':''),style:{textAlign:'left',marginBottom:'10px'}}); instr.textContent=instrTxt; body.appendChild(instr);
+    var cardsWrap = h('div',{style:{flex:'1',overflowY:'auto',display:'flex',flexDirection:'column',gap:'0',alignItems:'flex-start'}});
+    q.answers.forEach(function(a, ai){
+      var isPri = ans.primary===ai, isSec = ans.secondary===ai;
+      var card = h('div',{className:'answer-card'+(isPri?' sel-p':isSec?' sel-s':''),style:{display:'flex',width:'100%',maxWidth:'600px',marginBottom:'10px'},onclick:function(){
+        if(ans.primary===ai){if(ans.secondary!==null){ans.primary=ans.secondary;ans.secondary=null;}else{ans.primary=null;}}
+        else if(ans.secondary===ai){ans.secondary=null;}
+        else if(ans.primary===null){ans.primary=ai;}
+        else{ans.secondary=ai;}
+        renderStep2();
+      }});
+      var ct = h('div',{className:'card-text'}); ct.textContent=a.text; card.appendChild(ct);
+      var bp = h('span',{className:'card-badge badge-p'}); bp.textContent=S.twoPersonMode?'Person 1':'Primary'; card.appendChild(bp);
+      var bs = h('span',{className:'card-badge badge-s'}); bs.textContent=S.twoPersonMode?'Person 2':'Secondary'; card.appendChild(bs);
+      cardsWrap.appendChild(card);
+    });
+    body.appendChild(cardsWrap);
+  } else {
+    var subTxt = h('div',{style:{fontSize:'14px',color:'var(--text-secondary)',fontWeight:'300',marginBottom:'10px',lineHeight:'1.5'}});
+    subTxt.textContent='There are no wrong answers — your feedback helps us serve you better.'; body.appendChild(subTxt);
+    var ta = h('textarea',{className:'open-ta',placeholder:'Share your thoughts here...'}); ta.value=ans.open;
+    ta.addEventListener('input',function(){ans.open=ta.value;updateNudge();});
+    var nudge = h('div',{className:'open-nudge'+(ans.open.trim().length>0?' rdy':'')});
+    nudge.textContent=ans.open.trim().length>0?'Ready to continue':'Please share at least a few words to continue';
+    function updateNudge(){nudge.className='open-nudge'+(ta.value.trim().length>0?' rdy':'');nudge.textContent=ta.value.trim().length>0?'Ready to continue':'Please share at least a few words to continue';updateNextBtn();}
+    body.appendChild(ta); body.appendChild(nudge);
+  }
+  screen.appendChild(body);
+
+  var canAdv = q.type==='open' ? ans.open.trim().length>0 : q.type==='context' ? true : ans.primary!==null&&ans.secondary!==null;
+  var foot = h('div',{className:'footer-bar'});
+  var back = h('button',{className:'btn-secondary',onclick:function(){if(S.q>0){S.q--;renderStep2();}}});
+  back.textContent='← Back'; back.disabled=S.q===0; if(S.q===0)back.style.opacity='.3';
+  var nxt = h('button',{className:'btn-primary',onclick:function(){
+    if(q.type==='open')S.answers[S.q].open=document.querySelector('.open-ta')?document.querySelector('.open-ta').value:ans.open;
+    if(isLast){S.surveyAnswers=[...S.answers];S.surveyDone=true;renderSurveyComplete();}
+    else{S.q++;renderStep2();}
+  }});
+  nxt.textContent=isLast?'Finish →':'Continue →'; nxt.disabled=!canAdv; if(!canAdv)nxt.style.opacity='.3';
+  var nxtRef={el:nxt};
+  function updateNextBtn(){var v=document.querySelector('.open-ta')?document.querySelector('.open-ta').value.trim().length>0:false;nxtRef.el.disabled=!v;nxtRef.el.style.opacity=v?'1':'.3';}
+  foot.appendChild(back); foot.appendChild(nxt); screen.appendChild(foot);
+  app.appendChild(screen);
+}
+
+function renderSurveyComplete() {
+  var app = document.getElementById('app');
+  app.innerHTML='';
+  var screen = h('div',{className:'screen'});
+  var tb = h('div',{className:'top-bar'});
+  var left=h('div',{style:{display:'flex',alignItems:'center'}});
+  var dot=h('span',{className:'rep-dot'});left.appendChild(dot);
+  var lbl=h('span',{className:'rep-label'});lbl.textContent='Ownership Review';left.appendChild(lbl);
+  tb.appendChild(left);
+  var sl=h('span',{className:'step-label'});sl.textContent='Complete';tb.appendChild(sl);
+  screen.appendChild(tb);
+  var cs = h('div',{className:'complete-screen'});
+  var ic = h('div',{className:'check-icon'});
+  ic.innerHTML='<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M4 14L11 20L24 8" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var div = h('div',{style:{width:'40px',height:'1px',background:'var(--gold-border)'}});
+  var tt = h('div',{className:'complete-title'}); tt.textContent='Thank you';
+  var sub = h('div',{className:'complete-sub'}); sub.textContent="Your responses help us make sure you're getting the most from your ownership experience.";
+  var btn = h('button',{className:'btn-primary',style:{marginTop:'8px'},onclick:function(){S.step=3;renderStep3();}});
+  btn.textContent='Hand back to representative';
+  cs.appendChild(ic); cs.appendChild(div); cs.appendChild(tt); cs.appendChild(sub); cs.appendChild(btn);
+  screen.appendChild(cs); app.appendChild(screen);
+}
+
+// ─── STEP 3 ───────────────────────────────────────────────────────────────────
+function renderStep3() {
+  var app = document.getElementById('app');
+  app.innerHTML='';
+  var screen = h('div',{className:'screen'});
+  screen.appendChild(topBar('Rep View','Discovery input — Step 3 of 5',false));
+  screen.appendChild(ownerHeader(S.intake));
+  var scroll = h('div',{className:'scroll-area'});
+  var inner = h('div',{style:{padding:'18px 20px',display:'flex',flexDirection:'column',gap:'18px'}});
+
+  function secLbl(txt){var l=h('div',{className:'section-label'});l.textContent=txt;return l;}
+  function tapGrid(cls,items,state,setter){
+    var g=h('div',{className:cls});
+    items.forEach(function(item){
+      var c=h('div',{className:'tap-card'+(state===item[0]?' sel':''),onclick:function(){setter(item[0]);}});
+      var tl=h('div',{className:'tap-label'});tl.textContent=item[1];
+      var ts=h('div',{className:'tap-sub'});ts.textContent=item[2];
+      c.appendChild(tl);c.appendChild(ts);g.appendChild(c);
+    });
+    return g;
+  }
+
+  var usageBlk = h('div'); usageBlk.appendChild(secLbl('Usage style'));
+  usageBlk.appendChild(tapGrid('g3',[['internal','Internal','Home network only'],['external','External','Exchange networks'],['mixed','Mixed','Both networks']],S.d.usage,function(v){S.d.usage=v;renderStep3();}));
+  inner.appendChild(usageBlk); inner.appendChild(h('div',{className:'divider'}));
+
+  var bookBlk = h('div'); bookBlk.appendChild(secLbl('Current booking pattern'));
+  bookBlk.appendChild(tapGrid('g2',[['planned','Planned','Books 13+ months out'],['lastminute','Last Minute','Flexible timing']],S.d.booking,function(v){S.d.booking=v;renderStep3();}));
+  inner.appendChild(bookBlk);
+
+  var prefBlk = h('div'); prefBlk.appendChild(secLbl('Travel preference if anything were possible'));
+  prefBlk.appendChild(tapGrid('g3',[['planahead','Keep Planning Ahead','Like it locked in'],['spontaneous','More Spontaneous','Freedom matters'],['opentoboth','Open to Both','Depends on trip']],S.d.preference,function(v){S.d.preference=v;renderStep3();}));
+  inner.appendChild(prefBlk); inner.appendChild(h('div',{className:'divider'}));
+
+  var engBlk = h('div'); engBlk.appendChild(secLbl('Engagement & behavioral'));
+  engBlk.appendChild(tapGrid('g3',[['low','Low','Disengaged'],['medium','Medium','Cordial, present'],['high','High','Open, receptive']],S.d.engagement,function(v){S.d.engagement=v;renderStep3();}));
+  var gc = h('div',{className:'guard-card'+(S.d.guarded?' on':''),onclick:function(){S.d.guarded=!S.d.guarded;renderStep3();}});
+  var glt = h('div'); var gt=h('div',{className:'g-title'});gt.textContent='Guarded'; var gs=h('div',{className:'g-sub'});gs.textContent='Skeptical or resistant'; glt.appendChild(gt);glt.appendChild(gs);
+  var tp = h('div',{className:'toggle-pill'+(S.d.guarded?' on':'')}); var tt2=h('div',{className:'toggle-thumb'}); tp.appendChild(tt2);
+  gc.appendChild(glt); gc.appendChild(tp); engBlk.appendChild(gc); inner.appendChild(engBlk);
+  scroll.appendChild(inner); screen.appendChild(scroll);
+
+  var filled=[S.d.usage,S.d.booking,S.d.preference,S.d.engagement].filter(Boolean).length;
+  var foot=h('div',{className:'footer-bar'});
+  var rdTxt=h('div',{className:'readiness-txt'});rdTxt.innerHTML='<b>'+filled+'</b> of 4 selections';foot.appendChild(rdTxt);
+  var btn=h('button',{className:'btn-primary',onclick:function(){
+    S.discovery=Object.assign({},S.d);
+    S.score=scoreSession(S.surveyAnswers,S.discovery);
+    S.step=4; renderStep4();
+  }});btn.textContent='View Results →';btn.disabled=filled<4;if(filled<4)btn.style.opacity='.3';
+  foot.appendChild(btn);screen.appendChild(foot);app.appendChild(screen);
+}
+
+// ─── STEP 4 ───────────────────────────────────────────────────────────────────
+function renderStep4() {
+  var app = document.getElementById('app');
+  app.innerHTML='';
+  var screen = h('div',{className:'screen'});
+  screen.appendChild(topBar('Rep View','Results — Step 4 of 5',true));
+  screen.appendChild(ownerHeader(S.intake));
+
+  var tbBar = h('div',{className:'tab-bar'});
+  var tabs = [{id:'summary',label:'Ownership Summary',cls:''},{id:'notices',label:'Important Notices',cls:'alert-tab'},{id:'preferences',label:'Ownership Preferences',cls:''},{id:'pgm',label:'Maintenance Projection',cls:'pgm-tab'}];
+  var tabBodies = {};
+  tabs.forEach(function(tab){
+    var t=h('div',{className:'tab'+(tab.cls?' '+tab.cls:'')+(S.activeTab===tab.id?' active':'')});
+    if(tab.id==='notices'){t.innerHTML='Important Notices <span class="alert-pip"></span>';}
+    else{t.textContent=tab.label;}
+    t.addEventListener('click',function(){S.activeTab=tab.id;renderStep4();});
+    tbBar.appendChild(t);
+  });
+  screen.appendChild(tbBar);
+
+  var tabWrap = h('div',{style:{flex:'1',display:'flex',flexDirection:'column',overflow:'hidden'}});
+
+  // SUMMARY TAB
+  var sumBody = h('div',{className:'tab-body'+(S.activeTab==='summary'?' active':''),style:{padding:'18px 20px'}});
+  var vipCfg = VIP_LEVELS.find(function(v){return v.val===S.intake.vipLevel;});
+  var hero = h('div',{className:'hero-card'});
+  var ht=h('div',{className:'hero-title'});ht.textContent='Thank you, '+(S.intake.ownerName||'valued owner')+'.';
+  var hd=h('div',{className:'hero-div'});
+  var hs=h('div',{className:'hero-sub'});hs.textContent=(vipCfg&&vipCfg.vipName?'Your '+vipCfg.vipName+' membership reflects':'Your membership reflects')+' years of loyalty and a meaningful investment in your travel future.';
+  hero.appendChild(ht);hero.appendChild(hd);hero.appendChild(hs);sumBody.appendChild(hero);
+  // Frequent / multiple tours red header
+  if(S.intake.tourTypes && (S.intake.tourTypes.indexOf('Frequent')>-1 || S.intake.tourTypes.length > 1)){
+    var freqHdr = h('div',{style:{background:'var(--alert-bg)',border:'1px solid var(--alert-border)',borderRadius:'var(--radius)',padding:'12px 16px',marginBottom:'12px',display:'flex',alignItems:'center',gap:'8px'}});
+    var fdot = h('div',{style:{width:'8px',height:'8px',borderRadius:'50%',background:'var(--alert-text)',flexShrink:'0'}});
+    var ftxt = h('div',{style:{fontSize:'14px',fontWeight:'500',color:'var(--alert-text)',letterSpacing:'.06em',textTransform:'uppercase'}});
+    ftxt.textContent='Frequent / Multiple Tours'; freqHdr.appendChild(fdot); freqHdr.appendChild(ftxt); sumBody.appendChild(freqHdr);
+  }
+  var dg=h('div',{className:'d2'});
+  var dc1=h('div',{className:'dc'});var dl1=h('div',{className:'dc-lbl'});dl1.textContent='Ownership Level';var dv1=h('div',{className:'dc-val'});dv1.textContent=vipCfg&&vipCfg.vipName?vipCfg.vipName:'—';if(vipCfg)dv1.style.color=vipCfg.vipColor;var ds1=h('div',{className:'dc-sub'});ds1.textContent='Worldmark the Club';dc1.appendChild(dl1);dc1.appendChild(dv1);dc1.appendChild(ds1);
+  var dc2=h('div',{className:'dc'});var dl2=h('div',{className:'dc-lbl'});dl2.textContent='Monthly Maintenance';var dv2=h('div',{className:'dc-val'});dv2.textContent=S.intake.fee?'$'+parseFloat(S.intake.fee).toLocaleString():'—';dv2.style.color='var(--gold)';var ds2=h('div',{className:'dc-sub'});ds2.textContent='Per month';dc2.appendChild(dl2);dc2.appendChild(dv2);dc2.appendChild(ds2);
+  dg.appendChild(dc1);dg.appendChild(dc2);
+  // Credits row
+  var vipCr = S.intake.creditsVip ? parseInt(S.intake.creditsVip.replace(/,/g,''))||0 : 0;
+  var ineligCr = S.intake.creditsInelig ? parseInt(S.intake.creditsInelig.replace(/,/g,''))||0 : 0;
+  var totalCr = vipCr + ineligCr;
+  if(vipCr > 0 || ineligCr > 0){
+    var dc3=h('div',{className:'dc'});var dl3=h('div',{className:'dc-lbl'});dl3.textContent='Eligible Credits';var dv3=h('div',{className:'dc-val'});dv3.textContent=vipCr.toLocaleString();dv3.style.color='var(--gold-light)';var ds3=h('div',{className:'dc-sub'});ds3.textContent='VIP / Standard';dc3.appendChild(dl3);dc3.appendChild(dv3);dc3.appendChild(ds3);
+    var dc4=h('div',{className:'dc'});var dl4=h('div',{className:'dc-lbl'});dl4.textContent='Ineligible Credits';var dv4=h('div',{className:'dc-val'});dv4.textContent=ineligCr.toLocaleString();dv4.style.color='var(--alert-text)';var ds4=h('div',{className:'dc-sub'});ds4.textContent='Cannot roll into VIP';dc4.appendChild(dl4);dc4.appendChild(dv4);dc4.appendChild(ds4);
+    var dc5=h('div',{className:'dc',style:{gridColumn:'1/-1'}});var dl5=h('div',{className:'dc-lbl'});dl5.textContent='Total Credits';var dv5=h('div',{className:'dc-val'});dv5.textContent=totalCr.toLocaleString();dv5.style.color='var(--text-primary)';var ds5=h('div',{className:'dc-sub'});ds5.textContent='Combined eligible + ineligible';dc5.appendChild(dl5);dc5.appendChild(dv5);dc5.appendChild(ds5);
+    dg.appendChild(dc3);dg.appendChild(dc4);dg.appendChild(dc5);
+  }
+  // Last benefit review date
+  if(S.intake.tourDate){
+    var dc6=h('div',{className:'dc',style:{gridColumn:'1/-1'}});var dl6=h('div',{className:'dc-lbl'});dl6.textContent='Last Benefit Review';var dv6=h('div',{className:'dc-val'});dv6.textContent=S.intake.tourDate;dv6.style.color='var(--silver)';dc6.appendChild(dl6);dc6.appendChild(dv6);dg.appendChild(dc6);
+  }
+  sumBody.appendChild(dg);
+  var fb=h('div',{className:'flag-banner'});
+  var fbt=h('div',{className:'flag-banner-title'});fbt.textContent='Items Requiring Attention';fb.appendChild(fbt);
+  [{s:'Notice 01 — Disclosure Status',t:'There are important account notices that require review. Please see the Important Notices tab.'},{s:'Notice 02 — Eligibility Window',t:'This account has active eligibility items that expire. Time-sensitive information is available for review.'},{s:'Notice 03 — Maintenance Review',t:'A 20-year projection of your maintenance fees is available in the Maintenance Projection tab.'}].forEach(function(fi){
+    var f=h('div',{className:'flag-item'});var fs=h('div',{className:'flag-signal'});fs.textContent=fi.s;var ft=h('div',{className:'flag-text'});ft.textContent=fi.t;f.appendChild(fs);f.appendChild(ft);fb.appendChild(f);
+  });
+  sumBody.appendChild(fb);tabWrap.appendChild(sumBody);
+
+  // NOTICES TAB
+  var notBody = h('div',{className:'tab-body'+(S.activeTab==='notices'?' active':''),style:{padding:'18px 20px'}});
+  var nsLbl=h('div',{className:'ns-lbl'});nsLbl.textContent='Disclosure Status';notBody.appendChild(nsLbl);
+  if(S.discState===null){
+    var dOpts=h('div');
+    [{cls:'neutral',title:'Has not received official disclosure',color:'var(--text-secondary)',badge:'Pending',badgeCls:'muted',body:'Owner has not yet been presented with the official disclosure. First opportunity.',hint:'Tap to confirm this status',val:'none'},{cls:'pending',title:'Disclosure closed without response',color:'var(--alert-text)',badge:'Feb 18, 2025',badgeCls:'red',body:"Owner's disclosure window closed due to no response as of February 18th, 2025.",hint:'Tap to confirm this status',hintColor:'var(--alert-text)',val:'closed'}].forEach(function(d){
+      var dc=h('div',{className:'disc-card '+d.cls,onclick:function(){S.discState=d.val;renderStep4();}});
+      var dh=h('div',{className:'disc-hdr'});var dt=h('div',{className:'disc-title-txt'});dt.textContent=d.title;dt.style.color=d.color;
+      var db2=h('span',{className:'disc-badge '+d.badgeCls});db2.textContent=d.badge;dh.appendChild(dt);dh.appendChild(db2);
+      var dbody=h('div',{className:'disc-body-txt'});dbody.textContent=d.body;dbody.style.color=d.color;if(d.cls==='pending')dbody.style.opacity='.8';
+      var dhint=h('div',{className:'disc-hint-txt'});dhint.textContent=d.hint;if(d.hintColor)dhint.style.color=d.hintColor;
+      dc.appendChild(dh);dc.appendChild(dbody);dc.appendChild(dhint);dOpts.appendChild(dc);
+    });
+    notBody.appendChild(dOpts);
+  } else {
+    var confirmedCard=h('div',{className:'disc-card '+(S.discState==='closed'?'pending':'neutral'),style:{cursor:'default',borderWidth:S.discState==='closed'?'2px':'1px'}});
+    var ch=h('div',{className:'disc-hdr'});
+    var ct2=h('div',{className:'disc-title-txt'});ct2.style.color=S.discState==='closed'?'var(--alert-text)':'var(--text-primary)';
+    ct2.textContent=S.discState==='closed'?'Disclosure Closed — No Response':'Official Disclosure — Not Yet Received';
+    var cb=h('span',{className:'disc-badge '+(S.discState==='closed'?'red':'muted'),style:S.discState==='none'?{background:'rgba(255,255,255,0.06)',borderColor:'rgba(255,255,255,0.15)',color:'var(--text-secondary)'}:{}});
+    cb.textContent=S.discState==='closed'?'Feb 18, 2025':'Confirmed';
+    ch.appendChild(ct2);ch.appendChild(cb);
+    var cbody=h('div',{className:'disc-body-txt'});cbody.style.color=S.discState==='closed'?'var(--alert-text)':'var(--text-secondary)';if(S.discState==='closed')cbody.style.opacity='.85';
+    cbody.textContent=S.discState==='closed'?"Owner's disclosure window closed due to no response as of February 18th, 2025. Standardized pricing guidelines apply.":'Owner has not received official disclosure. First presentation opportunity.';
+    confirmedCard.appendChild(ch);confirmedCard.appendChild(cbody);notBody.appendChild(confirmedCard);
+    if(S.discState==='closed'){
+      var spCard=h('div',{style:{background:'var(--alert-bg)',border:'2px solid var(--alert-border)',borderRadius:'var(--radius)',padding:'16px',marginBottom:'10px'}});
+      var spt=h('div',{style:{fontSize:'14px',fontWeight:'500',color:'var(--alert-text)',marginBottom:'5px'}});spt.textContent='Eligible for Standardized Pricing';
+      var spb=h('div',{style:{fontSize:'13px',color:'var(--alert-text)',opacity:'.8',fontWeight:'300',lineHeight:'1.5'}});spb.textContent='Due to closed disclosure or no response, this owner qualifies under standardized pricing guidelines. Reference with manager support.';
+      spCard.appendChild(spt);spCard.appendChild(spb);notBody.appendChild(spCard);
+    }
+  }
+  var ebNsLbl=h('div',{className:'ns-lbl',style:{marginTop:'14px'}});ebNsLbl.textContent='Eddie Bauer Adventure Club';notBody.appendChild(ebNsLbl);
+  var ec=h('div',{className:'elig-card'});var eh=h('div',{className:'elig-hdr'});var et=h('div',{className:'elig-title-txt'});et.textContent='Adventure Club — Eligibility Window';var ebdg=h('span',{className:'elig-badge open'});ebdg.textContent='Eligible';eh.appendChild(et);eh.appendChild(ebdg);var eb2=h('div',{className:'elig-body-txt'});eb2.textContent='This owner falls within the current Eddie Bauer Adventure Club eligibility period.';var edr=h('div',{className:'elig-date-row'});var edl=h('div',{className:'elig-date-lbl'});edl.textContent='Window:';var edi1=h('input',{className:'elig-date-inp',type:'text'});edi1.value=S.ebStart;edi1.addEventListener('change',function(){S.ebStart=edi1.value;});var edash=h('div',{className:'elig-date-lbl'});edash.textContent='—';var edi2=h('input',{className:'elig-date-inp',type:'text'});edi2.value=S.ebEnd;edi2.addEventListener('change',function(){S.ebEnd=edi2.value;});edr.appendChild(edl);edr.appendChild(edi1);edr.appendChild(edash);edr.appendChild(edi2);ec.appendChild(eh);ec.appendChild(eb2);ec.appendChild(edr);notBody.appendChild(ec);
+  var pio=h('div',{className:'closed-card'});var piot=h('div',{style:{fontSize:'14px',fontWeight:'500',color:'var(--alert-text)',marginBottom:'5px'}});piot.textContent='Eddie Bauer Pioneer Pricing — Closed';var piob=h('div',{style:{fontSize:'13px',color:'var(--alert-text)',opacity:'.8',fontWeight:'300',lineHeight:'1.5'}});piob.textContent='Pioneer and preconstruction pricing for Eddie Bauer Adventure Club is no longer available. This window has passed. Owner should be aware this opportunity existed and is now closed.';pio.appendChild(piot);pio.appendChild(piob);notBody.appendChild(pio);
+  var pre=h('div',{className:'elig-card',style:{borderColor:'var(--alert-border)'}});var preh=h('div',{className:'elig-hdr'});var pret=h('div',{className:'elig-title-txt',style:{color:'var(--alert-text)'}});pret.textContent='Preconstruction Pricing — Closed';var predg=h('span',{className:'elig-badge closed'});predg.textContent='Closed';preh.appendChild(pret);preh.appendChild(predg);var preb=h('div',{className:'elig-body-txt'});preb.textContent='Preconstruction pricing tier is no longer accessible through standard enrollment.';pre.appendChild(preh);pre.appendChild(preb);notBody.appendChild(pre);
+  if(S.discState==='closed'){
+    var mp=h('div',{className:'mgr-prompt'});var mph=h('div',{className:'mgr-hdr'});var mpi=h('div',{className:'mgr-icon'});mpi.innerHTML='<svg viewBox="0 0 14 14" fill="none" width="14" height="14"><circle cx="7" cy="4.5" r="2.2" stroke="rgba(160,200,255,0.8)" stroke-width="1.1"/><path d="M2.5 12c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="rgba(160,200,255,0.8)" stroke-width="1.1" stroke-linecap="round"/></svg>';var mpt=h('div',{className:'mgr-title'});mpt.textContent='Manager Review Required';mph.appendChild(mpi);mph.appendChild(mpt);var mpb=h('div',{className:'mgr-body'});mpb.textContent="Based on this owner's disclosure status, a manager should be present or consulted before proceeding. A petition or right-scenario pathway may be available. Please request manager assistance now.";var mpr=h('div',{className:'mgr-ref'});mpr.textContent='Ref: Disclosure Status Confirmed — Rep Action Required';mp.appendChild(mph);mp.appendChild(mpb);mp.appendChild(mpr);notBody.appendChild(mp);
+  }
+  tabWrap.appendChild(notBody);
+
+  // PREFERENCES TAB
+  var prefBody=h('div',{className:'tab-body'+(S.activeTab==='preferences'?' active':''),style:{padding:'18px 20px'}});
+  var pc=h('div',{className:'pref-card'});
+  if(S.surveyAnswers){
+    QUESTIONS.forEach(function(q,qi){
+      var ans=S.surveyAnswers[qi];if(!ans)return;
+      if(q.type==='open'){
+        var sl2=h('div',{className:'pref-sec-lbl'});sl2.textContent="In Their Own Words";pc.appendChild(sl2);
+        var qt=h('div',{className:'pref-q-txt'});qt.textContent='Q4 — '+q.text;pc.appendChild(qt);
+        var po=h('div',{className:'pref-open'});po.textContent=ans.open?'"'+ans.open+'"':'No response provided';if(!ans.open)po.style.fontStyle='normal';pc.appendChild(po);return;
+      }
+      // Context questions (Q12-14)
+      if(q.type==='context'){
+        if(qi===11){var ctxLbl=h('div',{className:'pref-sec-lbl',style:{marginTop:'8px'}});ctxLbl.textContent='Ownership Context';pc.appendChild(ctxLbl);}
+        var ctxA=ans.contextA!==null&&q.answers[ans.contextA]?q.answers[ans.contextA]:null;
+        var ctxB=ans.contextB!==null&&q.answers[ans.contextB]?q.answers[ans.contextB]:null;
+        var qt3=h('div',{className:'pref-q-txt'});qt3.textContent='Q'+q.id+' — '+q.text;pc.appendChild(qt3);
+        var ar3=h('div',{className:'pref-a-row'});
+        if(ctxA){var pa3=h('span',{className:'pref-a',style:{background:'rgba(100,160,240,0.1)',borderColor:'rgba(100,160,240,0.3)',color:'rgba(160,200,255,0.9)'}});pa3.textContent=ctxA.text;ar3.appendChild(pa3);}
+        if(ctxB){var pb3=h('span',{className:'pref-a sec',style:{background:'rgba(100,160,240,0.06)',borderColor:'rgba(100,160,240,0.2)',color:'rgba(160,200,255,0.7)'}});pb3.textContent=ctxB.text;ar3.appendChild(pb3);}
+        if(!ctxA&&!ctxB){var pna=h('span',{style:{fontSize:'12px',color:'var(--text-muted)',fontStyle:'italic'}});pna.textContent='No response';ar3.appendChild(pna);}
+        pc.appendChild(ar3);return;
+      }
+      var pri=ans.primary!==null?q.answers[ans.primary]:null;
+      var sec=ans.secondary!==null?q.answers[ans.secondary]:null;
+      var qt2=h('div',{className:'pref-q-txt'});qt2.textContent='Q'+q.id+' — '+q.text;pc.appendChild(qt2);
+      var ar=h('div',{className:'pref-a-row'});
+      if(pri){var pa=h('span',{className:'pref-a'});pa.textContent=(S.twoPersonMode?'P1: ':'')+pri.text;ar.appendChild(pa);}
+      if(sec){var sa=h('span',{className:'pref-a sec'});sa.textContent=(S.twoPersonMode?'P2: ':'')+sec.text;ar.appendChild(sa);}
+      pc.appendChild(ar);
+    });
+  }
+  prefBody.appendChild(pc);tabWrap.appendChild(prefBody);
+
+  // PGM TAB
+  var pgmBody=h('div',{className:'tab-body'+(S.activeTab==='pgm'?' active':''),style:{padding:'18px 20px'}});
+  var monthly=parseFloat(S.intake.fee)||0;
+  if(monthly>0){
+    var pgmRows=calcPGM(monthly);
+    var yr1=pgmRows[0].annual, yr10=pgmRows[9].cumulative, yr20=pgmRows[19].cumulative;
+    var phc=h('div',{className:'pgm-hdr-card'});var poi=h('div');var pon=h('div',{className:'pgm-owner-name'});pon.textContent=S.intake.ownerName||'Owner';var ponu=h('div',{className:'pgm-owner-num'});ponu.textContent=S.intake.ownerNum?'Owner # '+S.intake.ownerNum:'';poi.appendChild(pon);poi.appendChild(ponu);var pfb=h('div');var pfl=h('div',{className:'pgm-fee-lbl'});pfl.textContent='Monthly Maintenance';var pfv=h('div',{className:'pgm-fee-val'});pfv.textContent='$'+monthly.toLocaleString();var pfs=h('div',{className:'pgm-fee-sub'});pfs.textContent='per month';pfb.appendChild(pfl);pfb.appendChild(pfv);pfb.appendChild(pfs);phc.appendChild(poi);phc.appendChild(pfb);pgmBody.appendChild(phc);
+    var psr=h('div',{className:'pgm-sum-row'});
+    [{lbl:'Year 1 Annual',val:'$'+yr1.toLocaleString(),sub:'Starting fee',color:'var(--gold)'},{lbl:'10-Year Cumulative',val:'$'+yr10.toLocaleString(),sub:'Projected 10 year total',color:'#f0c97a'},{lbl:'20-Year Total',val:'$'+yr20.toLocaleString(),sub:'Projected cumulative',color:'var(--alert-text)'}].forEach(function(s){
+      var sc2=h('div',{className:'pgm-sum-card'});var sl3=h('div',{className:'pgm-s-lbl'});sl3.textContent=s.lbl;var sv=h('div',{className:'pgm-s-val'});sv.textContent=s.val;sv.style.color=s.color;var ss=h('div',{className:'pgm-s-sub'});ss.textContent=s.sub;sc2.appendChild(sl3);sc2.appendChild(sv);sc2.appendChild(ss);psr.appendChild(sc2);
+    });
+    pgmBody.appendChild(psr);
+    var ptbl=h('div',{className:'pgm-tbl'});
+    var pth=h('div',{className:'pgm-tbl-hdr'});['Year','Annual Fee','Cumulative'].forEach(function(t,i){var th=h('div',{className:'pgm-th'});th.textContent=t;if(i>0)th.style.textAlign='right';pth.appendChild(th);});ptbl.appendChild(pth);
+    pgmRows.forEach(function(r){
+      var pr=h('div',{className:'pgm-row'+(r.y%5===0&&r.y!==20?' milestone':r.y===20?' final':'')});
+      var c1=h('div',{className:'pgm-cell yr'});c1.textContent=r.y;
+      var c2=h('div',{className:'pgm-cell ann'});c2.textContent='$'+r.annual.toLocaleString();
+      var c3=h('div',{className:'pgm-cell cum'+(r.y===20?' last':'')});c3.textContent='$'+r.cumulative.toLocaleString();
+      pr.appendChild(c1);pr.appendChild(c2);pr.appendChild(c3);ptbl.appendChild(pr);
+    });
+    var pn=h('div',{className:'pgm-note'});pn.textContent='All fees are projected estimates rounded to the nearest dollar.';ptbl.appendChild(pn);pgmBody.appendChild(ptbl);
+  } else {
+    var noFee=h('div',{style:{textAlign:'center',padding:'40px 20px',color:'var(--text-muted)',fontWeight:'300'}});noFee.textContent='No maintenance fee entered. Please go back to intake.';pgmBody.appendChild(noFee);
+  }
+  tabWrap.appendChild(pgmBody);
+  screen.appendChild(tabWrap);
+  app.appendChild(screen);
+
+  // Build overlay content
+  buildOverlay();
+}
+
+function buildOverlay() {
+  var oc=document.getElementById('overlay-content');
+  if(!oc||!S.score)return;
+  oc.innerHTML='';
+  var sc=S.score;
+
+  function buildPersonProfile(person, label) {
+    var wrap = h('div',{style:{marginBottom:'16px'}});
+    if (label) {
+      var plbl = h('div',{style:{fontSize:'12px',fontWeight:'500',letterSpacing:'.1em',textTransform:'uppercase',color:'var(--gold)',marginBottom:'10px',paddingBottom:'6px',borderBottom:'1px solid var(--gold-border)'}});
+      plbl.textContent = label; wrap.appendChild(plbl);
+    }
+    var ic=h('div',{className:'id-card',style:{marginBottom:'12px'}});
+    var ibg=h('div',{className:'id-bg'});
+    ibg.innerHTML='<svg width="100%" height="100%" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><polygon points="310,10 390,140 230,140" fill="'+person.shapes[0].color+'" opacity="0.9"/>'+( person.isHybrid?'<circle cx="55" cy="170" r="95" fill="'+person.shapes[1].color+'" opacity="0.8"/>':'')+'</svg>';
+    var ii=h('div',{className:'id-inner'});
+    var it=h('div',{className:'id-top'});
+    var il=h('div');
+    var itl=h('div',{className:'id-type-lbl'});itl.textContent='Behavioral Profile';
+    var ity=h('div',{className:'id-type'});ity.textContent=person.desc;
+    var im=h('div',{className:'id-mindset'});im.textContent='Mindset: '+person.mindset+' · '+(person.isHybrid?person.top+' / '+person.second+' blend':'Primary '+person.top);
+    il.appendChild(itl);il.appendChild(ity);il.appendChild(im);
+    var ir=h('div',{style:{textAlign:'right'}});
+    var cl=h('div',{className:'conf-lbl'});cl.textContent='System Confidence';
+    var cb=h('div',{className:'conf-bars'});
+    [{lbl:'Internal',conf:person.intConf},{lbl:'External',conf:person.extConf}].forEach(function(c){
+      var bw=h('div',{className:'conf-bar-wrap'});
+      var bar=h('div',{className:'conf-bar'+(c.conf==='High'?' hi':c.conf==='Medium'?' lo':'')});
+      var bl=h('div',{className:'conf-bar-lbl'});bl.textContent=c.lbl;
+      bw.appendChild(bar);bw.appendChild(bl);cb.appendChild(bw);
+    });
+    ir.appendChild(cl);ir.appendChild(cb);it.appendChild(il);it.appendChild(ir);ii.appendChild(it);
+    if(person.jackal){
+      var jr=h('div',{className:'jackal-row'});
+      var jd=h('div',{className:'j-dot'});
+      var jt=h('div',{className:'j-text'});jt.textContent='Proceed with more control, proof, and pacing. Avoid pushing too quickly.';
+      jr.appendChild(jd);jr.appendChild(jt);ii.appendChild(jr);
+    }
+    ic.appendChild(ibg);ic.appendChild(ii);wrap.appendChild(ic);
+    // Playbook
+    var pb=h('div',{className:'pb-card',style:{marginBottom:'12px'}});
+    var pbt=h('div',{className:'pb-title'});pbt.textContent='Communication Playbook';pb.appendChild(pbt);
+    var pbg=h('div',{className:'pb-grid'});
+    [{lbl:'How to communicate',items:person.pb.communicate,cls:''},{lbl:'What builds trust',items:person.pb.trust,cls:''},{lbl:'What creates movement',items:person.pb.movement,cls:''},{lbl:'What to avoid',items:person.pb.avoid,cls:'avoid'}].forEach(function(s){
+      var sec=h('div',{className:'pb-sec '+s.cls});
+      var sl2=h('div',{className:'pb-sec-lbl'});sl2.textContent=s.lbl;sec.appendChild(sl2);
+      s.items.forEach(function(item){var pi=h('div',{className:'pb-item'});pi.textContent=item;sec.appendChild(pi);});
+      pbg.appendChild(sec);
+    });
+    pb.appendChild(pbg);wrap.appendChild(pb);
+    // Opportunity Angles
+    var ec1=h('div',{className:'exp-card',style:{marginBottom:'12px'}});
+    var eh1=h('div',{className:'exp-hdr'});
+    var ett1=h('div',{className:'exp-ttl'});ett1.textContent='Opportunity Angles';
+    var ea1=h('span',{className:'exp-arr'});ea1.textContent='⌄';
+    var eb1=h('div',{className:'exp-bdy'});
+    eh1.addEventListener('click',function(){var open=eb1.style.display==='flex';eb1.style.display=open?'none':'flex';ea1.style.transform=open?'none':'rotate(180deg)';});
+    person.angles.forEach(function(a,i){
+      var ai=h('div',{className:'angle-item'});
+      var an=h('div',{className:'angle-num'});an.textContent='Angle 0'+(i+1);
+      var at=h('div',{className:'angle-text'});at.textContent=a;
+      ai.appendChild(an);ai.appendChild(at);eb1.appendChild(ai);
+    });
+    eh1.appendChild(ett1);eh1.appendChild(ea1);ec1.appendChild(eh1);ec1.appendChild(eb1);wrap.appendChild(ec1);
+    // Curiosity Prompts
+    var ec2=h('div',{className:'exp-card',style:{marginBottom:'12px'}});
+    var eh2=h('div',{className:'exp-hdr'});
+    var ett2=h('div',{className:'exp-ttl'});ett2.textContent='Curiosity Prompts';
+    var ea2=h('span',{className:'exp-arr'});ea2.textContent='⌄';
+    var eb2=h('div',{className:'exp-bdy'});
+    eh2.addEventListener('click',function(){var open=eb2.style.display==='flex';eb2.style.display=open?'none':'flex';ea2.style.transform=open?'none':'rotate(180deg)';});
+    person.curiosity.forEach(function(c){
+      var ci=h('div',{className:'curiosity-item'});
+      var ct=h('div',{className:'curiosity-text'});ct.textContent=c;ci.appendChild(ct);eb2.appendChild(ci);
+    });
+    eh2.appendChild(ett2);eh2.appendChild(ea2);ec2.appendChild(eh2);ec2.appendChild(eb2);wrap.appendChild(ec2);
+    return wrap;
+  }
+
+  if (sc.twoPersonMode && sc.p2) {
+    // Side-by-side label header
+    var tpHdr = h('div',{style:{background:'var(--navy-card)',border:'1px solid var(--card-border)',borderRadius:'var(--radius)',padding:'12px 16px',marginBottom:'14px',display:'flex',alignItems:'center',gap:'8px'}});
+    var tpDot = h('div',{style:{width:'8px',height:'8px',borderRadius:'50%',background:'var(--gold)',flexShrink:'0'}});
+    var tpTxt = h('div',{style:{fontSize:'14px',color:'var(--gold-light)',fontWeight:'500'}});
+    tpTxt.textContent = 'Two-person profile — scored independently';
+    tpHdr.appendChild(tpDot); tpHdr.appendChild(tpTxt); oc.appendChild(tpHdr);
+    // Jackal combined advisory
+    if (sc.jackal) {
+      var jr=h('div',{className:'jackal-row',style:{marginBottom:'14px'}});
+      var jd=h('div',{className:'j-dot'});
+      var jt=h('div',{className:'j-text'});jt.textContent='Proceed with more control, proof, and pacing. Resistance detected — avoid pushing too quickly.';
+      jr.appendChild(jd);jr.appendChild(jt);oc.appendChild(jr);
+    }
+    oc.appendChild(buildPersonProfile(sc.p1, 'Person 1 — Primary'));
+    var divLine = h('div',{style:{height:'2px',background:'var(--gold-border)',margin:'4px 0 16px',borderRadius:'1px'}});
+    oc.appendChild(divLine);
+    oc.appendChild(buildPersonProfile(sc.p2, 'Person 2 — Secondary'));
+  } else {
+    oc.appendChild(buildPersonProfile(sc.p1, null));
+  }
+}
+
+function openOverlay(){document.getElementById('overlay-screen').classList.add('open');}
+function closeOverlay(){document.getElementById('overlay-screen').classList.remove('open');}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderStep1();
+</script>
+</body>
+</html>
